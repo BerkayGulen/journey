@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
+  AnimatePresence,
   motion,
   useAnimationFrame,
   useMotionValue,
@@ -9,6 +10,7 @@ import {
 } from "motion/react";
 import { currentCourses, layout } from "@/data/courses";
 import { useAnchorRef } from "@/lib/anchors";
+import { readableTextColor } from "@/lib/geometry";
 
 const collapsedWidth = layout.leftCollapsedWidth;
 const expandedWidth = Math.round(collapsedWidth * layout.leftExpandFactor);
@@ -19,12 +21,16 @@ const loopCourses = [...currentCourses, ...currentCourses];
 
 function CourseBlock({
   id,
+  code,
+  name,
   color,
   blockKey,
   hovered,
   onHover,
 }: {
   id: string;
+  code: string;
+  name: string;
   color: string;
   blockKey: string;
   hovered: string | null;
@@ -32,17 +38,37 @@ function CourseBlock({
 }) {
   const anchorRef = useAnchorRef(`course-${id}`);
   const grown = hovered === blockKey;
+  const textColor = readableTextColor(color);
   return (
     <motion.div
       ref={anchorRef}
-      className="w-full"
+      className="relative flex w-full items-center overflow-hidden"
       style={{ backgroundColor: color, flexGrow: grown ? 4 : 1, flexBasis: 0 }}
       animate={{ flexGrow: grown ? 4 : 1 }}
       transition={{ type: "spring", stiffness: 220, damping: 28 }}
       onHoverStart={() => onHover(blockKey)}
       onHoverEnd={() => onHover(null)}
-      aria-hidden
-    />
+    >
+      <AnimatePresence>
+        {grown && (
+          <motion.div
+            className="px-3"
+            style={{ color: textColor }}
+            initial={{ opacity: 0, x: -6 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -6 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+          >
+            <div className="text-base font-semibold tracking-wide whitespace-nowrap">
+              {code}
+            </div>
+            <div className="mt-0.5 text-[11px] leading-tight opacity-80">
+              {name}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 
@@ -105,6 +131,8 @@ export default function LeftSidebar() {
             <CourseBlock
               key={blockKey}
               id={course.id}
+              code={course.code}
+              name={course.name}
               color={course.color}
               blockKey={blockKey}
               hovered={hoveredBlock}

@@ -3,6 +3,8 @@
 /** A course in the student's current semester (left sidebar block). */
 export interface Course {
   id: string;
+  /** Course code shown on hover, e.g. "ID 202". */
+  code: string;
   name: string;
   /** Persistent course color (hex). */
   color: string;
