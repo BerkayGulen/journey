@@ -7,6 +7,7 @@ import {
   controlPoints,
   distanceToSegment,
   edgeFade,
+  hash01,
   hexToRgba,
   leftEdgePoint,
   rightEdgePoint,
@@ -16,7 +17,7 @@ import {
 const courseColor = new Map(currentCourses.map((c) => [c.id, c.color]));
 
 // Wave + cursor tuning.
-const WAVE_AMPLITUDE = 20; // px of vertical sway
+const WAVE_AMPLITUDE = 22; // px of vertical sway
 const WAVE_SPEED = 0.00055; // radians per ms
 const CURSOR_RADIUS = 220; // px of influence
 const CURSOR_STRENGTH = 0.6; // how strongly lines bend toward the cursor
@@ -26,6 +27,29 @@ const FADE_MARGIN = 46; // px edge band for carousel crossfade
 // sit on the border without overlapping the neighbouring block's seam).
 const TOP_T = 0.04;
 const BOTTOM_T = 0.96;
+
+const TAU = Math.PI * 2;
+
+/**
+ * A stable, distinct "personality" per line so the set looks asymmetric and
+ * amorphous instead of a tidy bundle of mirror-image S-curves. Each control
+ * point gets its own reach, a static vertical offset, and an independently
+ * phased/sped sway. Keyed by line index (connection * 2 + edge).
+ */
+const lineParams = Array.from({ length: connections.length * 2 }, (_, k) => ({
+  amp1: WAVE_AMPLITUDE * (0.5 + hash01(k * 2 + 1) * 1.2),
+  amp2: WAVE_AMPLITUDE * (0.5 + hash01(k * 2 + 2) * 1.2),
+  ph1: hash01(k + 5) * TAU,
+  ph2: hash01(k + 9) * TAU,
+  sp1: WAVE_SPEED * (0.55 + hash01(k + 13) * 0.9),
+  sp2: WAVE_SPEED * (0.55 + hash01(k + 17) * 0.9),
+  // Static asymmetric resting offset — bends each curve off the clean S.
+  off1: (hash01(k + 21) - 0.5) * 90,
+  off2: (hash01(k + 25) - 0.5) * 90,
+  // Independent horizontal reach → the curve's belly leans left or right.
+  cv1: 0.4 + hash01(k + 29) * 0.38,
+  cv2: 0.4 + hash01(k + 33) * 0.38,
+}));
 
 export default function ConnectionCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -77,8 +101,6 @@ export default function ConnectionCanvas() {
         if (!targetEl) return;
         const targetRect = targetEl.getBoundingClientRect();
 
-        const phase = i * 0.9;
-
         // Each course can have two copies (carousel loop) — draw both, weighted
         // by the block centre's edge fade so they crossfade across the wrap.
         for (const sourceEl of sources) {
@@ -90,9 +112,14 @@ export default function ConnectionCanvas() {
           for (const [bi, t] of [TOP_T, BOTTOM_T].entries()) {
             const start = rightEdgePoint(rect, t);
             const end = leftEdgePoint(targetRect, t);
-            const wave = reduced
-              ? 0
-              : Math.sin(time * WAVE_SPEED + phase + bi * 0.7) * WAVE_AMPLITUDE;
+            const p = lineParams[i * 2 + bi];
+
+            // Independent sway per control point (static offset + animated),
+            // so the two ends of each curve wander out of sync — amorphous.
+            const wave1 =
+              p.off1 + (reduced ? 0 : Math.sin(time * p.sp1 + p.ph1) * p.amp1);
+            const wave2 =
+              p.off2 + (reduced ? 0 : Math.sin(time * p.sp2 + p.ph2) * p.amp2);
 
             // Cursor proximity → bend control points toward the cursor.
             let bend = 0;
@@ -106,7 +133,13 @@ export default function ConnectionCanvas() {
             }
 
             const width = Math.max(0.6, Math.min(4, rect.height / 120));
-            const [cp1, cp2] = controlPoints(start, end, wave, bend);
+            const [cp1, cp2] = controlPoints(start, end, {
+              wave1,
+              wave2,
+              bend,
+              curviness1: p.cv1,
+              curviness2: p.cv2,
+            });
 
             ctx.beginPath();
             ctx.moveTo(start.x, start.y);

@@ -21,29 +21,49 @@ export function leftEdgePoint(rect: DOMRect, t: number): Point {
   return { x: rect.left, y: rect.top + rect.height * t };
 }
 
+export interface ControlOptions {
+  /** Vertical offset (px) of the first control point (near `start`). */
+  wave1?: number;
+  /** Vertical offset (px) of the second control point (near `end`). */
+  wave2?: number;
+  /** Extra vertical pull (px) applied to both, e.g. from cursor proximity. */
+  bend?: number;
+  /** How far (fraction of dx) cp1 reaches toward the centre. */
+  curviness1?: number;
+  /** How far (fraction of dx) cp2 reaches toward the centre. */
+  curviness2?: number;
+}
+
 /**
- * Control points for a cubic bezier between `start` and `end`.
- *
- * @param wave   vertical offset (px) applied to the control points to create a
- *               soft S-shaped sway. Pass a time-varying value for animation.
- * @param bend   extra vertical pull (px) applied near the curve's middle, e.g.
- *               from cursor proximity. Positive bends downward.
- * @param curviness  how far (fraction of dx) the control points reach toward
- *               the centre. Higher → flatter starts and a deeper S-curve.
+ * Control points for a cubic bezier between `start` and `end`. The two points
+ * are independent (separate reach + vertical offset), so curves can be
+ * asymmetric and amorphous rather than clean mirror-image S-shapes.
  */
 export function controlPoints(
   start: Point,
   end: Point,
-  wave = 0,
-  bend = 0,
-  curviness = 0.58,
+  opts: ControlOptions = {},
 ): [Point, Point] {
+  const {
+    wave1 = 0,
+    wave2 = 0,
+    bend = 0,
+    curviness1 = 0.58,
+    curviness2 = 0.58,
+  } = opts;
   const dx = end.x - start.x;
-  // Push control points horizontally toward (and slightly past) the centre so
-  // the curve eases out of each edge, then sweeps through a pronounced S.
-  const cp1: Point = { x: start.x + dx * curviness, y: start.y + wave + bend };
-  const cp2: Point = { x: end.x - dx * curviness, y: end.y - wave + bend };
+  const cp1: Point = { x: start.x + dx * curviness1, y: start.y + wave1 + bend };
+  const cp2: Point = { x: end.x - dx * curviness2, y: end.y + wave2 + bend };
   return [cp1, cp2];
+}
+
+/**
+ * Deterministic pseudo-random value in [0, 1) from an integer seed. Used to
+ * give each line a stable, distinct shape (no per-frame flicker, no Math.random).
+ */
+export function hash01(seed: number): number {
+  const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
 }
 
 /**
