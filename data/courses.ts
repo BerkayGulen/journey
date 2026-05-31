@@ -12,12 +12,12 @@ import type { Course, HistoryStrip, ConnectionDef } from "@/types";
  * Each block has a persistent color; the code appears on hover.
  */
 export const currentCourses: Course[] = [
-  { id: "ffd202", code: "FFD 202", name: "İleri Tasarım Sunum Teknikleri", color: "#E63329" }, // red
-  { id: "id202", code: "ID 202", name: "Ürün Tasarım Stüdyosu II", color: "#E6447F" }, // pink
-  { id: "id204", code: "ID 204", name: "Endüstriyel Tasarımda Göstergebilim", color: "#E3C400" }, // yellow
-  { id: "id208", code: "ID 208", name: "Üretim Teknolojileri", color: "#185C46" }, // dark green
-  { id: "pool003", code: "POOL 003", name: "GED - Sosyal Bilimler A: İktisadi Bilimler", color: "#243C8E" }, // navy
-  { id: "sfl202", code: "SFL 202", name: "İkinci Yabancı Diller IV", color: "#5A2A0E" }, // brown
+  { id: "ffd202", code: "FFD 202", name: "İleri Tasarım Sunum Teknikleri", color: "#8B162B" }, // Crimson Ink
+  { id: "id202", code: "ID 202", name: "Ürün Tasarım Stüdyosu II", color: "#F9B6B8" }, // Dusty Rose
+  { id: "id204", code: "ID 204", name: "Endüstriyel Tasarımda Göstergebilim", color: "#C6B63B" }, // Neon Pear
+  { id: "id208", code: "ID 208", name: "Üretim Teknolojileri", color: "#F6F3CF" }, // Cosmic Latte
+  { id: "pool003", code: "POOL 003", name: "GED - Sosyal Bilimler A: İktisadi Bilimler", color: "#BAD2E8" }, // Arctic Blue
+  { id: "sfl202", code: "SFL 202", name: "İkinci Yabancı Diller IV", color: "#F37521" }, // Burnt Sienna
 ];
 
 /** Color cycle used to generate the (thinner) history strips. */

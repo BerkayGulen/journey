@@ -112,3 +112,68 @@ export function readableTextColor(hex: string): string {
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   return luminance > 0.6 ? "#1a1a1a" : "#ffffff";
 }
+
+/** Parse a hex color into HSL (h in [0,360), s/l in [0,1]). */
+function hexToHsl(hex: string): { h: number; s: number; l: number } {
+  const c = hex.replace("#", "");
+  const r = parseInt(c.substring(0, 2), 16) / 255;
+  const g = parseInt(c.substring(2, 4), 16) / 255;
+  const b = parseInt(c.substring(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  let h = 0;
+  let s = 0;
+  const d = max - min;
+  if (d !== 0) {
+    s = d / (1 - Math.abs(2 * l - 1));
+    switch (max) {
+      case r:
+        h = ((g - b) / d) % 6;
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      default:
+        h = (r - g) / d + 4;
+    }
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+  return { h, s, l };
+}
+
+/** Build a hex color from HSL (h in [0,360), s/l in [0,1]). */
+function hslToHex(h: number, s: number, l: number): string {
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  if (h < 60) [r, g, b] = [c, x, 0];
+  else if (h < 120) [r, g, b] = [x, c, 0];
+  else if (h < 180) [r, g, b] = [0, c, x];
+  else if (h < 240) [r, g, b] = [0, x, c];
+  else if (h < 300) [r, g, b] = [x, 0, c];
+  else [r, g, b] = [c, 0, x];
+  const to2 = (v: number) =>
+    Math.round((v + m) * 255)
+      .toString(16)
+      .padStart(2, "0");
+  return `#${to2(r)}${to2(g)}${to2(b)}`;
+}
+
+/**
+ * Derive the AI's "ink" color from the student's (selected course) color by
+ * rotating the hue, so the AI blob is always distinct from the student blob
+ * regardless of which course was chosen. Kept a touch deeper/saturated so it
+ * reads as a second voice rather than a tint of the first.
+ */
+export function aiInk(hex: string, hueShift = 175): string {
+  const { h, s, l } = hexToHsl(hex);
+  const nh = (h + hueShift) % 360;
+  const ns = Math.min(1, Math.max(0.45, s));
+  const nl = Math.min(0.6, Math.max(0.32, l * 0.85));
+  return hslToHex(nh, ns, nl);
+}

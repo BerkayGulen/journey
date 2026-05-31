@@ -28,6 +28,7 @@
 /dev.log
 /shot.py
 /shot*.png
+/scripts/shots/
 
 # debug
 npm-debug.log*

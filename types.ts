@@ -29,3 +29,35 @@ export interface ConnectionDef {
 
 /** Which edge of an element an anchor point sits on. */
 export type AnchorSide = "left" | "right";
+
+// ── Private Chat workspace ────────────────────────────────────────────────
+
+/**
+ * The AI's conversational + visual register. Orthogonal to the workspace phase:
+ * - "socratic"    — soft, fluid, blended colors; gentle questioning.
+ * - "adversarial" — background darkens, shapes sharpen/angular; challenges.
+ */
+export type AiMode = "socratic" | "adversarial";
+
+/** Who authored a chat message. */
+export type MessageRole = "student" | "ai";
+
+/** A single turn in the Private Chat conversation. */
+export interface ChatMessage {
+  id: string;
+  role: MessageRole;
+  /** Full final text (grows while `streaming` is true). */
+  text: string;
+  /** Mode this message belongs to — drives its bubble shape/color. */
+  mode: AiMode;
+  createdAt: number;
+  /** True while an AI message is still streaming in (gradual reveal). */
+  streaming?: boolean;
+}
+
+/** The ongoing Private Chat conversation for a selected course. */
+export interface Conversation {
+  courseId: string;
+  messages: ChatMessage[];
+  mode: AiMode;
+}
