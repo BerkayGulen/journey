@@ -9,13 +9,6 @@ import type { AiProvider, SendMessageParams } from "@/lib/ai/types";
  * Replace this with a real provider via `lib/ai/index.ts` (see note there).
  */
 
-// First Socratic reply — mirrors the design brief: name the move, then ask one
-// focused question. Used for the opening turn (the student's first idea-dump).
-const FIRST_SOCRATIC =
-  "What you did here is a problem observation — you identified several distinct " +
-  "friction points. Each one could be its own design direction. Before you go " +
-  "further, which of these feels most unresolved for you — and why that one?";
-
 const SOCRATIC_POOL = [
   "Say more about that. What's underneath the first thing you reached for?",
   "You're describing a symptom. What do you think is actually causing it?",
@@ -59,8 +52,7 @@ function prefersReducedMotion(): boolean {
 function pickReply(params: SendMessageParams): string {
   const priorAiTurns = params.history.filter((m) => m.role === "ai").length;
   if (params.mode === "socratic") {
-    if (priorAiTurns === 0) return FIRST_SOCRATIC;
-    return SOCRATIC_POOL[(priorAiTurns - 1) % SOCRATIC_POOL.length];
+    return SOCRATIC_POOL[priorAiTurns % SOCRATIC_POOL.length];
   }
   return ADVERSARIAL_POOL[priorAiTurns % ADVERSARIAL_POOL.length];
 }
