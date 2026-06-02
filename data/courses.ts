@@ -1,4 +1,5 @@
-import type { Course, HistoryStrip, ConnectionDef } from "@/types";
+import type { Course, ConnectionDef } from "@/types";
+import { semesters } from "@/data/semesters";
 
 /**
  * Mock data for the Journey welcome screen. This is intentionally the single
@@ -20,51 +21,28 @@ export const currentCourses: Course[] = [
   { id: "sfl202", code: "SFL 202", name: "İkinci Yabancı Diller IV", color: "#F37521" }, // Burnt Sienna
 ];
 
-/** Color cycle used to generate the (thinner) history strips. */
-const historyPalette = [
-  "#E63329",
-  "#E6447F",
-  "#E3C400",
-  "#185C46",
-  "#9DBDE6",
-  "#243C8E",
-  "#1A237E",
-  "#5A2A0E",
-];
-
 /**
- * Previous courses / lesson history — ~20 very thin strips occupying the lower
- * quarter of the right sidebar (e.g. a 2nd-year student who has taken 20 courses).
- */
-export const historyCourses: HistoryStrip[] = Array.from(
-  { length: 20 },
-  (_, i) => ({
-    id: `h${i + 1}`,
-    color: historyPalette[i % historyPalette.length],
-  }),
-);
-
-/**
- * Organic lines connecting current course blocks (left) to points in the
- * history region (right). Not 1:1 — each current course maps to one history
- * strip, spread across the history band.
+ * Organic lines connecting current course blocks (left) to semester blocks in
+ * the history spine (right). Not 1:1 — each current course maps to one semester,
+ * spread across the full-height spine so the fan covers it top-to-bottom.
  */
 export const connections: ConnectionDef[] = currentCourses.map((course, i) => {
-  // Spread the 7 targets across the 20 history strips.
-  const targetIndex = Math.round((i / (currentCourses.length - 1)) * (historyCourses.length - 1));
-  return { courseId: course.id, historyId: historyCourses[targetIndex].id };
+  const targetIndex = Math.round((i / (currentCourses.length - 1)) * (semesters.length - 1));
+  return { courseId: course.id, historyId: semesters[targetIndex].id };
 });
+
+/** Collapsed width of the left (current courses) sidebar, in px. */
+const leftCollapsedWidth = 64;
+/** Multiplier applied to the left sidebar width when expanded. */
+const leftExpandFactor = 3.25;
 
 /** Layout constants shared by the sidebars and the connection canvas. */
 export const layout = {
-  /** Collapsed width of the left (current courses) sidebar, in px. */
-  leftCollapsedWidth: 64,
-  /** Multiplier applied to the left sidebar width when expanded. */
-  leftExpandFactor: 3.25,
-  /** Collapsed width of the right (history) sidebar, in px. */
-  rightCollapsedWidth: 26,
-  /** Multiplier applied to the right sidebar width when previewed. */
-  rightExpandFactor: 2.5,
-  /** Fraction of screen height the history strips occupy (from the bottom). */
-  historyHeightRatio: 0.25,
+  leftCollapsedWidth,
+  leftExpandFactor,
+  /** Right (history) sidebar widths — half the left sidebar's, collapsed & expanded. */
+  rightCollapsedWidth: leftCollapsedWidth / 2, // 32
+  rightExpandedWidth: (leftCollapsedWidth * leftExpandFactor) / 2, // 104
+  /** Fraction of screen height the right sidebar occupies (anchored to the bottom). */
+  rightHeightRatio: 1,
 } as const;

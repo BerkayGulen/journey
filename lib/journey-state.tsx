@@ -10,7 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { AiMode, ChatMessage, Conversation, Course } from "@/types";
+import type { AiMode, ChatMessage, Conversation, Course, Semester } from "@/types";
 import { ai } from "@/lib/ai";
 
 /**
@@ -28,7 +28,8 @@ export type JourneyPhase =
   | "splitting" // a course block is showing its Classroom / Private halves
   | "entering" // Private chosen — welcome animating out, workspace in
   | "ideaDump" // immersive intro: student blob + free-form brain dump
-  | "conversing"; // turns exchanged with the AI
+  | "conversing" // turns exchanged with the AI
+  | "history"; // full-page academic-history detail view (semester columns)
 
 /** How long the welcome→workspace cross-transition is given to play. */
 const ENTER_MS = 650;
@@ -44,6 +45,7 @@ interface JourneyValue {
   phase: JourneyPhase;
   mode: AiMode;
   selectedCourse: Course | null;
+  selectedSemester: Semester | null;
   conversation: Conversation;
   /** True while an AI turn is streaming in (locks input, drives "alive" feel). */
   isSending: boolean;
@@ -54,6 +56,7 @@ interface JourneyValue {
   choosePrivate(): void; // splitting → entering → ideaDump
   chooseClassroom(): void; // stub (Classroom Chat defined later)
   cancelSplit(): void; // splitting → welcome
+  openHistory(semester: Semester): void; // welcome → history (active semester)
   submitFirstDump(text: string): void; // ideaDump → conversing
   sendTurn(text: string): void; // conversing: append student turn + AI reply
   setMode(mode: AiMode): void; // socratic ↔ adversarial
@@ -77,6 +80,7 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<JourneyPhase>("welcome");
   const [mode, setModeState] = useState<AiMode>("socratic");
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [selectedSemester, setSelectedSemester] = useState<Semester | null>(null);
   const [conversation, setConversation] = useState<Conversation>(emptyConversation());
   const [isSending, setIsSending] = useState(false);
 
@@ -105,6 +109,13 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
     // For now this is a no-op stub — selecting it does not leave the welcome.
     cancelSplit();
   }, [cancelSplit]);
+
+  // ── Welcome → history (academic-history detail) ────────────────────────
+  const openHistory = useCallback((semester: Semester) => {
+    if (!semester.active) return; // locked semesters are not navigable
+    setSelectedSemester(semester);
+    setPhase("history");
+  }, []);
 
   // The `entering` phase exists purely to give the cross-transition a window;
   // advance to the idea-dump once it has had time to play.
@@ -219,6 +230,7 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
     setIsSending(false);
     setPhase("welcome");
     setSelectedCourse(null);
+    setSelectedSemester(null);
     setConversation(emptyConversation());
     setModeState("socratic");
   }, []);
@@ -231,12 +243,14 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
       phase,
       mode,
       selectedCourse,
+      selectedSemester,
       conversation,
       isSending,
       selectCourse,
       choosePrivate,
       chooseClassroom,
       cancelSplit,
+      openHistory,
       submitFirstDump,
       sendTurn,
       setMode,
@@ -246,12 +260,14 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
       phase,
       mode,
       selectedCourse,
+      selectedSemester,
       conversation,
       isSending,
       selectCourse,
       choosePrivate,
       chooseClassroom,
       cancelSplit,
+      openHistory,
       submitFirstDump,
       sendTurn,
       setMode,

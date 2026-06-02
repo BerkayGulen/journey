@@ -61,17 +61,27 @@ Stacking (z-index): aurora background `-z-10` → canvas `z-0` → sidebars `z-1
 
 ### Where things live
 
-- `data/courses.ts` — **single source of truth** for course data and layout constants
-  (`currentCourses`, `historyCourses`, derived `connections`, and the `layout` widths/factors).
-  Currently holds a real example program (IEU Industrial Design, 2nd-year spring). Add/remove a
-  course here and the sidebar + connections adapt automatically.
+- `data/courses.ts` — **single source of truth** for current-semester course data and layout
+  constants (`currentCourses`, derived `connections`, and the `layout` widths). Holds a real
+  example program (IEU Industrial Design, 2nd-year spring). Add/remove a course here and the
+  left sidebar + connections adapt automatically.
+- `data/semesters.ts` — **single source of truth** for academic history: `semesters` (8 entries,
+  first 3 `active`/completed, rest locked), each active one carrying its `courses` with `grade` +
+  `breakdown`. Feeds the right sidebar spine, the history detail view, and the `connections`
+  targets (line endpoints, anchored as `history-{semester.id}`).
 - `lib/geometry.ts` — pure math/color helpers: `controlPoints` (the two bezier control points
   are **independent** per end — that asymmetry is what makes the lines look amorphous),
   `hash01` (deterministic per-line seed → each line gets stable amplitude/phase/speed/offset),
-  `edgeFade`, edge-point helpers, and color utils (`hexToRgba`, `readableTextColor`).
-- `components/` — `JourneyScreen` (composition + `AnchorProvider` + aurora div),
+  `edgeFade`, edge-point helpers, and color utils (`hexToRgba`, `readableTextColor`, `aiInk`).
+- `components/` — `JourneyScreen` (phase-driven composition + `AnchorProvider` + aurora div),
   `LeftSidebar` (carousel + hover-expand + click-lock + per-block grow + course-code label),
-  `RightSidebar` (history strips + hover preview), `ConnectionCanvas`, `Wordmark`.
+  `RightSidebar` (8 history blocks in a shorter, bottom-anchored panel — `layout.rightHeightRatio`;
+  mirrors the left's interaction: hover widens the panel + the hovered block grows to reveal its
+  label; active blocks open the history view, locked blocks muted/`not-allowed`),
+  `ConnectionCanvas`, `Wordmark`.
+- `components/history/` — `HistoryDetail` (full-page semester view: full-height course columns +
+  Escape/`← Journey` return) and `CourseColumn` (per-course column, widen-in-place on click to
+  reveal the grade breakdown). Mounted by `JourneyScreen` when `phase === "history"`.
 
 ### Conventions
 

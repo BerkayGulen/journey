@@ -8,6 +8,7 @@ import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar from "@/components/RightSidebar";
 import Wordmark from "@/components/Wordmark";
 import WorkspaceScreen from "@/components/workspace/WorkspaceScreen";
+import HistoryDetail from "@/components/history/HistoryDetail";
 
 /**
  * Phase-driven composition. The welcome layers and the Private Chat workspace
@@ -24,6 +25,7 @@ function Stage() {
   const showWelcome = phase === "welcome" || phase === "splitting" || phase === "entering";
   const showWorkspace =
     phase === "entering" || phase === "ideaDump" || phase === "conversing";
+  const showHistory = phase === "history";
 
   return (
     <main className="relative h-full w-full overflow-hidden">
@@ -55,6 +57,21 @@ function Stage() {
             transition={{ duration: dur, ease: "easeInOut" }}
           >
             <WorkspaceScreen />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showHistory && (
+          <motion.div
+            key="history"
+            className="absolute inset-0 z-30"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: dur, ease: "easeInOut" }}
+          >
+            <HistoryDetail />
           </motion.div>
         )}
       </AnimatePresence>

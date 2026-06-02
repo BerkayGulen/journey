@@ -10,20 +10,61 @@ export interface Course {
   color: string;
 }
 
-/** A previously-taken course (right sidebar history strip). */
-export interface HistoryStrip {
+// ── Academic history (right sidebar = semester spine) ─────────────────────
+
+/** A passing/failing letter grade in the IEU system. */
+export type Grade = "AA" | "BA" | "BB" | "CB" | "CC" | "DC" | "DD" | "FF";
+
+/** One weighted component of a course's grade (project / midterm / final / …). */
+export interface GradeComponent {
+  label: string;
+  grade: Grade;
+  /** Optional weight in percent, e.g. 40 for a final worth 40%. */
+  weight?: number;
+}
+
+/** A completed course shown as a full-height column in the history detail view. */
+export interface HistoryCourse {
   id: string;
+  /** Course code, e.g. "ID 201". */
+  code: string;
+  name: string;
+  /** Persistent column color (hex). */
   color: string;
+  /** Final passing grade, e.g. "AA". */
+  grade: Grade;
+  /** Project / assignment / exam breakdown revealed when the column expands. */
+  breakdown: GradeComponent[];
+}
+
+/**
+ * One semester block in the right "history" spine. The first three are
+ * `active` (completed, clickable, full color); the rest are locked (muted).
+ */
+export interface Semester {
+  id: string;
+  /** Full label shown on hover, e.g. "1st Year Fall". */
+  label: string;
+  /** Compact label for tight contexts, e.g. "1st Fall". */
+  shortLabel: string;
+  year: 1 | 2 | 3 | 4;
+  term: "fall" | "spring";
+  /** Persistent semester color (hex). */
+  color: string;
+  /** True when completed — clickable and full color; locked/muted otherwise. */
+  active: boolean;
+  /** Courses taken that semester (empty for locked semesters). */
+  courses: HistoryCourse[];
 }
 
 /**
  * A connection drawn as an organic line from a current course block (left)
- * to a point in the course-history region (right).
+ * to a semester block in the history spine (right).
  */
 export interface ConnectionDef {
   /** Course id — source anchor (left block's right edge). */
   courseId: string;
-  /** History strip id — target anchor (right strip's left edge). */
+  /** Semester id — target anchor (right strip's left edge). */
   historyId: string;
 }
 
