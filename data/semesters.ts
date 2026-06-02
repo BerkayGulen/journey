@@ -94,7 +94,7 @@ export const semesters: Semester[] = [
     shortLabel: "1st Fall",
     year: 1,
     term: "fall",
-    color: "#FFF685",
+    color: "#F4D892", // Butter
     active: true,
     courses: firstYearFall,
   },
@@ -104,7 +104,7 @@ export const semesters: Semester[] = [
     shortLabel: "1st Spring",
     year: 1,
     term: "spring",
-    color: "#FFC246",
+    color: "#F286A3", // Guava
     active: true,
     courses: firstYearSpring,
   },
@@ -114,7 +114,7 @@ export const semesters: Semester[] = [
     shortLabel: "2nd Fall",
     year: 2,
     term: "fall",
-    color: "#00E98E",
+    color: "#E89C73", // Sunset
     active: true,
     courses: secondYearFall,
   },
@@ -124,7 +124,7 @@ export const semesters: Semester[] = [
     shortLabel: "2nd Spring",
     year: 2,
     term: "spring",
-    color: "#76A03D",
+    color: "#E36559", // Sangria
     active: false,
     courses: [],
   },
@@ -134,7 +134,7 @@ export const semesters: Semester[] = [
     shortLabel: "3rd Fall",
     year: 3,
     term: "fall",
-    color: "#6CF1D6",
+    color: "#C0B05B", // Moss
     active: false,
     courses: [],
   },
@@ -144,7 +144,7 @@ export const semesters: Semester[] = [
     shortLabel: "3rd Spring",
     year: 3,
     term: "spring",
-    color: "#00C49B",
+    color: "#657652", // Palm
     active: false,
     courses: [],
   },
@@ -154,7 +154,7 @@ export const semesters: Semester[] = [
     shortLabel: "4th Fall",
     year: 4,
     term: "fall",
-    color: "#AED7FF",
+    color: "#94BEBB", // Lagoon
     active: false,
     courses: [],
   },
@@ -164,7 +164,7 @@ export const semesters: Semester[] = [
     shortLabel: "4th Spring",
     year: 4,
     term: "spring",
-    color: "#66B6FF",
+    color: "#23617E", // Odyssey
     active: false,
     courses: [],
   },

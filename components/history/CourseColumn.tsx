@@ -27,7 +27,7 @@ export default function CourseColumn({
     <motion.button
       type="button"
       onClick={onToggle}
-      className="relative flex h-full cursor-pointer flex-col items-start overflow-hidden px-5 pb-7 pt-16 text-left outline-none"
+      className="relative flex h-full cursor-pointer flex-col items-start overflow-hidden px-5 pb-7 pt-24 text-left outline-none"
       style={{ backgroundColor: course.color, color: textColor, flexBasis: 0 }}
       animate={{ flexGrow: expanded ? 4 : 1 }}
       transition={

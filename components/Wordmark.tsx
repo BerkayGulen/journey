@@ -17,23 +17,25 @@ export default function Wordmark({
 
   return (
     <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
-      <motion.span
-        className="font-hand text-5xl tracking-wide text-foreground/85 select-none sm:text-7xl"
+      {/* The "Journey" logo (black ink, transparent bg) on the cream backdrop. */}
+      <motion.img
+        src="/icons/journeyLogo.png"
+        alt="Journey"
+        draggable={false}
+        className="h-16 select-none sm:h-28"
         animate={
           hide
             ? { opacity: 0 }
             : reduced
-              ? { opacity: 1 }
-              : { scale: [1, 1.025, 1], opacity: [0.82, 1, 0.82] }
+              ? { opacity: 1, scale: 1 }
+              : { scale: [1, 1.025, 1] }
         }
         transition={
           hide
             ? { duration: 0.3, ease: "easeOut" }
             : { duration: 6, ease: "easeInOut", repeat: Infinity }
         }
-      >
-        Journey
-      </motion.span>
+      />
     </div>
   );
 }

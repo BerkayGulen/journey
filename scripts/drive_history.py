@@ -66,7 +66,7 @@ with sync_playwright() as p:
     page.wait_for_timeout(500)
     page.mouse.click(W - 4, ACTIVE_Y)
     page.wait_for_timeout(1100)
-    page.get_by_text("← Journey", exact=True).click()
+    page.get_by_label("Back to Journey").click()
     page.wait_for_timeout(900)
     shot(page, f"{PREFIX}07_wordmark_back.png")
 

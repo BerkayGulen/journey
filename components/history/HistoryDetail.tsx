@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { useJourney } from "@/lib/journey-state";
 import { useMediaQuery } from "@/lib/media";
+import JourneyLogo from "@/components/JourneyLogo";
 import CourseColumn from "@/components/history/CourseColumn";
 import CourseRow from "@/components/history/CourseRow";
 
@@ -37,12 +38,28 @@ export default function HistoryDetail() {
   const toggle = (id: string) =>
     setExpandedId((cur) => (cur === id ? null : id));
 
-  return (
-    <div className="relative h-full w-full overflow-hidden bg-background">
-      {narrow ? (
-        // Mobile: a scrollable vertical list of horizontal course rows, below a
-        // top band that holds the back/title controls.
-        <div className="flex h-full w-full flex-col overflow-y-auto pt-14">
+  if (narrow) {
+    // Mobile: an opaque header bar (back + semester) that stays put, above a
+    // separate scroll area — so scrolling rows never overlap the controls.
+    return (
+      <div className="flex h-full w-full flex-col overflow-hidden bg-background">
+        <header className="relative z-20 flex h-12 shrink-0 items-center justify-between bg-background px-4">
+          <motion.button
+            type="button"
+            onClick={reset}
+            aria-label="Back to Journey"
+            className="flex items-center gap-2 outline-none"
+            initial={{ opacity: 0.85 }}
+            whileHover={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <span className="font-hand text-2xl italic text-foreground/70">←</span>
+            <JourneyLogo tone="dark" className="h-8" />
+          </motion.button>
+          <span className="font-hand text-base italic text-foreground/55">{label}</span>
+        </header>
+
+        <div className="flex flex-1 flex-col overflow-y-auto">
           {courses.map((course, i) => (
             <motion.div
               key={course.id}
@@ -63,49 +80,52 @@ export default function HistoryDetail() {
             </motion.div>
           ))}
         </div>
-      ) : (
-        // Wide: full-height columns that widen in place on click.
-        <div className="flex h-full w-full">
-          {courses.map((course, i) => (
-            <motion.div
-              key={course.id}
-              className="flex h-full"
-              style={{ flexGrow: 1, flexBasis: 0 }}
-              initial={reduced ? { opacity: 0 } : { opacity: 0, y: 28 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: reduced ? 0 : 0.5,
-                delay: reduced ? 0 : i * 0.05,
-                ease: "easeOut",
-              }}
-            >
-              <CourseColumn
-                course={course}
-                expanded={expandedId === course.id}
-                onToggle={() => toggle(course.id)}
-              />
-            </motion.div>
-          ))}
-        </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* Home — return to the welcome screen (also Escape). Faint wordmark,
-          consistent with the workspace's minimal identity. `mix-blend-difference`
-          keeps it legible over any column color without adding a card/scrim. */}
+  // Wide: full-height columns that widen in place on click; controls overlay
+  // the (non-scrolling) columns.
+  return (
+    <div className="relative h-full w-full overflow-hidden bg-background">
+      <div className="flex h-full w-full">
+        {courses.map((course, i) => (
+          <motion.div
+            key={course.id}
+            className="flex h-full"
+            style={{ flexGrow: 1, flexBasis: 0 }}
+            initial={reduced ? { opacity: 0 } : { opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: reduced ? 0 : 0.5,
+              delay: reduced ? 0 : i * 0.05,
+              ease: "easeOut",
+            }}
+          >
+            <CourseColumn
+              course={course}
+              expanded={expandedId === course.id}
+              onToggle={() => toggle(course.id)}
+            />
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Home — back arrow + Journey logo, keyed light over the (dark) first column. */}
       <motion.button
         type="button"
         onClick={reset}
         aria-label="Back to Journey"
-        className="absolute left-7 top-6 z-20 font-hand text-xl italic text-white outline-none mix-blend-difference"
-        initial={{ opacity: 0.7 }}
+        className="absolute left-7 top-4 z-20 flex items-center gap-2 outline-none"
+        initial={{ opacity: 0.75 }}
         whileHover={{ opacity: 1 }}
-        transition={{ duration: 0.6, ease: "easeInOut" }}
+        transition={{ duration: 0.4, ease: "easeInOut" }}
       >
-        ← Journey
+        <span className="font-hand text-4xl italic text-white mix-blend-difference">←</span>
+        <JourneyLogo tone="light" className="h-16" />
       </motion.button>
 
-      {/* Semester label — minimal type, top-right; blend-mode keeps it readable. */}
-      <div className="pointer-events-none absolute right-7 top-6 z-20 font-hand text-xl italic text-white opacity-70 mix-blend-difference">
+      <div className="pointer-events-none absolute right-7 top-5 z-20 font-hand text-xl italic text-white opacity-70 mix-blend-difference">
         {label}
       </div>
     </div>

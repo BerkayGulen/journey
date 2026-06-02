@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useJourney } from "@/lib/journey-state";
 import { aiInk } from "@/lib/geometry";
+import JourneyLogo from "@/components/JourneyLogo";
 import BlobField from "@/components/workspace/BlobField";
 import IdeaDumpIntro from "@/components/workspace/IdeaDumpIntro";
 import ConversationView from "@/components/workspace/ConversationView";
@@ -53,19 +54,18 @@ export default function WorkspaceScreen() {
         mode={mode}
       />
 
-      {/* Home — return to the welcome screen (also Escape). No icon, just the
-          wordmark, consistent with the minimal identity. */}
+      {/* Home — return to the welcome screen (also Escape). The Journey logo,
+          keyed light/dark to the current (socratic/adversarial) background. */}
       <motion.button
         type="button"
         onClick={reset}
         aria-label="Back to Journey"
-        className="absolute left-7 top-6 z-20 font-hand text-xl italic outline-none"
-        initial={false}
-        animate={{ color: adversarial ? "rgba(245,245,245,0.55)" : "rgba(26,26,26,0.4)" }}
+        className="absolute left-7 top-6 z-20 outline-none"
+        initial={{ opacity: 0.75 }}
         whileHover={{ opacity: 1 }}
-        transition={{ duration: 0.8, ease: "easeInOut" }}
+        transition={{ duration: 0.4, ease: "easeInOut" }}
       >
-        Journey
+        <JourneyLogo tone={adversarial ? "light" : "dark"} className="h-12 sm:h-16" />
       </motion.button>
 
       <AnimatePresence mode="wait">
