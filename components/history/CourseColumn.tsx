@@ -1,7 +1,8 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { hexToRgba, readableTextColor } from "@/lib/geometry";
+import { motion, useReducedMotion } from "motion/react";
+import { readableTextColor } from "@/lib/geometry";
+import GradeBreakdown from "@/components/history/GradeBreakdown";
 import type { HistoryCourse } from "@/types";
 
 /**
@@ -21,7 +22,6 @@ export default function CourseColumn({
 }) {
   const reduced = useReducedMotion();
   const textColor = readableTextColor(course.color);
-  const divider = hexToRgba(textColor, 0.18);
 
   return (
     <motion.button
@@ -52,40 +52,7 @@ export default function CourseColumn({
       </div>
 
       {/* Breakdown, revealed when expanded. */}
-      <AnimatePresence initial={false}>
-        {expanded && (
-          <motion.div
-            className="w-full max-w-[20rem] overflow-hidden"
-            initial={reduced ? { opacity: 0 } : { opacity: 0, height: 0 }}
-            animate={reduced ? { opacity: 1 } : { opacity: 1, height: "auto" }}
-            exit={reduced ? { opacity: 0 } : { opacity: 0, height: 0 }}
-            transition={{ duration: reduced ? 0 : 0.32, ease: "easeOut" }}
-          >
-            <div className="text-[10px] tracking-[0.25em] uppercase opacity-60">
-              Breakdown
-            </div>
-            <ul className="mt-2">
-              {course.breakdown.map((c) => (
-                <li
-                  key={c.label}
-                  className="flex items-baseline justify-between gap-4 border-t py-2 text-sm"
-                  style={{ borderColor: divider }}
-                >
-                  <span className="opacity-80">
-                    {c.label}
-                    {c.weight != null && (
-                      <span className="ml-1 text-[11px] opacity-60">
-                        · {c.weight}%
-                      </span>
-                    )}
-                  </span>
-                  <span className="font-medium tabular-nums">{c.grade}</span>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <GradeBreakdown course={course} expanded={expanded} textColor={textColor} />
     </motion.button>
   );
 }

@@ -11,11 +11,15 @@ import {
 import { currentCourses, layout } from "@/data/courses";
 import { useAnchorRef } from "@/lib/anchors";
 import { PRIVATE_PORTAL_LAYOUT_ID, useJourney } from "@/lib/journey-state";
+import { useCoarsePointer } from "@/lib/pointer";
+import { useMediaQuery } from "@/lib/media";
 import { readableTextColor } from "@/lib/geometry";
 import type { Course } from "@/types";
 
 const collapsedWidth = layout.leftCollapsedWidth;
 const expandedWidth = Math.round(collapsedWidth * layout.leftExpandFactor);
+// Narrower expansion on small / mobile screens so the panel doesn't dominate.
+const narrowExpandedWidth = 170;
 const LOOP_DURATION_MS = 45_000; // time for one full vertical loop
 
 // Render each course twice so the strip can scroll seamlessly.
@@ -28,6 +32,8 @@ function CourseBlock({
   color,
   blockKey,
   hovered,
+  forceLabel,
+  scrollItem = false,
   onHover,
   onSelect,
 }: {
@@ -37,18 +43,29 @@ function CourseBlock({
   color: string;
   blockKey: string;
   hovered: string | null;
+  /** Show the label regardless of hover (touch: sidebar expanded). */
+  forceLabel: boolean;
+  /** Mobile scroll-list mode: fixed-ish height block (no carousel grow). */
+  scrollItem?: boolean;
   onHover: (key: string | null) => void;
   onSelect: () => void;
 }) {
   const anchorRef = useAnchorRef(`course-${id}`);
   const grown = hovered === blockKey;
+  const showLabel = grown || forceLabel;
   const textColor = readableTextColor(color);
   return (
     <motion.div
       ref={anchorRef}
       className="relative flex w-full cursor-pointer items-center overflow-hidden"
-      style={{ backgroundColor: color, flexGrow: grown ? 4 : 1, flexBasis: 0 }}
-      animate={{ flexGrow: grown ? 4 : 1 }}
+      // Scroll mode: grow to fill but never shrink below ~6.5rem, so the list
+      // fills the panel when the courses fit and scrolls when they don't.
+      style={
+        scrollItem
+          ? { backgroundColor: color, flexGrow: 1, flexShrink: 0, flexBasis: "6.5rem" }
+          : { backgroundColor: color, flexGrow: grown ? 4 : 1, flexBasis: 0 }
+      }
+      animate={scrollItem ? undefined : { flexGrow: grown ? 4 : 1 }}
       transition={{ type: "spring", stiffness: 220, damping: 28 }}
       onHoverStart={() => onHover(blockKey)}
       onHoverEnd={() => onHover(null)}
@@ -59,7 +76,7 @@ function CourseBlock({
       }}
     >
       <AnimatePresence>
-        {grown && (
+        {showLabel && (
           <motion.div
             className="px-3"
             style={{ color: textColor }}
@@ -157,8 +174,14 @@ function SplitPanel({
   );
 }
 
-export default function LeftSidebar() {
+export default function LeftSidebar({
+  onExpandedChange,
+}: {
+  /** Reports whether the sidebar is currently expanded (for the wordmark). */
+  onExpandedChange?: (open: boolean) => void;
+} = {}) {
   const reduced = useReducedMotion();
+  const isTouch = useCoarsePointer();
   const containerRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
 
@@ -171,6 +194,25 @@ export default function LeftSidebar() {
   const [hoveredBlock, setHoveredBlock] = useState<string | null>(null);
   // While splitting, the sidebar stays expanded regardless of hover/lock.
   const expanded = hovered || locked || splitting;
+  // Width follows the viewport (narrow screens), not the pointer type — so it
+  // also shrinks in a narrow desktop window, not only on real touch devices.
+  const narrow = useMediaQuery("(max-width: 639px)");
+  const panelExpandedWidth = narrow ? narrowExpandedWidth : expandedWidth;
+
+  // Surface the expanded state so the wordmark can hide behind it (mobile).
+  useEffect(() => {
+    onExpandedChange?.(expanded);
+  }, [expanded, onExpandedChange]);
+
+  // Touch has no hover: first tap expands the carousel + reveals labels,
+  // second tap on a block selects it (desktop hover already expands first).
+  const activate = (course: Course) => {
+    if (isTouch && !expanded) {
+      setLocked(true);
+      return;
+    }
+    selectCourse(course);
+  };
 
   // Continuous vertical scroll, eased to a stop while the sidebar is active.
   const y = useMotionValue(0);
@@ -211,39 +253,74 @@ export default function LeftSidebar() {
     return () => document.removeEventListener("mousedown", onDown);
   }, [splitting, cancelSplit]);
 
+  // On a narrow screen, once expanded, drop the auto-scroll carousel for a
+  // native, finger-scrollable list of all courses (so you can browse + tap).
+  const scrollMode = narrow && expanded;
+
   return (
     <motion.div
       ref={containerRef}
-      className="absolute left-0 top-0 z-10 h-full overflow-hidden"
+      // Sits above the centered wordmark while expanded so it doesn't show
+      // through the panel (notably on mobile, where the panel overlaps centre).
+      className={`absolute left-0 top-0 h-full ${expanded ? "z-30" : "z-10"} ${
+        scrollMode ? "overflow-y-auto" : "overflow-hidden"
+      }`}
       style={{ width: collapsedWidth }}
-      animate={{ width: expanded ? expandedWidth : collapsedWidth }}
+      animate={{ width: expanded ? panelExpandedWidth : collapsedWidth }}
       transition={{ type: "spring", stiffness: 260, damping: 32 }}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
+      onHoverStart={() => {
+        if (!isTouch) setHovered(true);
+      }}
+      onHoverEnd={() => {
+        if (!isTouch) setHovered(false);
+      }}
       onClick={() => setLocked(true)}
     >
-      <motion.div
-        ref={stripRef}
-        className="flex w-full flex-col"
-        style={{ height: "200%", y }}
-      >
-        {loopCourses.map((course, i) => {
-          const blockKey = `${course.id}-${i}`;
-          return (
+      {scrollMode ? (
+        <div className="flex min-h-full w-full flex-col">
+          {currentCourses.map((course) => (
             <CourseBlock
-              key={blockKey}
+              key={course.id}
               id={course.id}
               code={course.code}
               name={course.name}
               color={course.color}
-              blockKey={blockKey}
+              blockKey={course.id}
               hovered={hoveredBlock}
-              onHover={setHoveredBlock}
-              onSelect={() => selectCourse(course)}
+              forceLabel
+              scrollItem
+              onHover={() => {}}
+              onSelect={() => activate(course)}
             />
-          );
-        })}
-      </motion.div>
+          ))}
+        </div>
+      ) : (
+        <motion.div
+          ref={stripRef}
+          className="flex w-full flex-col"
+          style={{ height: "200%", y }}
+        >
+          {loopCourses.map((course, i) => {
+            const blockKey = `${course.id}-${i}`;
+            return (
+              <CourseBlock
+                key={blockKey}
+                id={course.id}
+                code={course.code}
+                name={course.name}
+                color={course.color}
+                blockKey={blockKey}
+                hovered={hoveredBlock}
+                forceLabel={isTouch && expanded}
+                onHover={(k) => {
+                  if (!isTouch) setHoveredBlock(k);
+                }}
+                onSelect={() => activate(course)}
+              />
+            );
+          })}
+        </motion.div>
+      )}
 
       <AnimatePresence>
         {splitting && selectedCourse && (

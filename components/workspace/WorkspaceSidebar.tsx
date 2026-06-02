@@ -41,7 +41,7 @@ export default function WorkspaceSidebar() {
       animate={reduced ? { opacity: 1 } : { opacity: 1, x: 0 }}
       exit={reduced ? { opacity: 0 } : { opacity: 0, x: 24 }}
       transition={{ duration: reduced ? 0.2 : 0.6, ease: "easeOut" }}
-      className={`absolute right-0 top-0 z-10 flex h-full w-60 flex-col justify-between border-l px-6 py-8 backdrop-blur-md transition-colors duration-700 ${panel}`}
+      className={`absolute right-0 top-0 z-10 hidden h-full w-60 flex-col justify-between border-l px-6 py-8 backdrop-blur-md transition-colors duration-700 md:flex ${panel}`}
     >
       <div className="flex flex-col gap-6">
         {/* Milestones */}

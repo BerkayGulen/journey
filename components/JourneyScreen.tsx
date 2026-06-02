@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { AnchorProvider } from "@/lib/anchors";
 import { JourneyProvider, useJourney } from "@/lib/journey-state";
@@ -22,6 +23,10 @@ function Stage() {
   const reduced = useReducedMotion();
   const dur = reduced ? 0 : 0.55;
 
+  // Whether a welcome sidebar is expanded — used to hide the wordmark on mobile.
+  const [leftOpen, setLeftOpen] = useState(false);
+  const [rightOpen, setRightOpen] = useState(false);
+
   const showWelcome = phase === "welcome" || phase === "splitting" || phase === "entering";
   const showWorkspace =
     phase === "entering" || phase === "ideaDump" || phase === "conversing";
@@ -39,9 +44,9 @@ function Stage() {
           >
             <div className="bg-aurora pointer-events-none absolute inset-0 -z-10" aria-hidden />
             <ConnectionCanvas />
-            <LeftSidebar />
-            <RightSidebar />
-            <Wordmark />
+            <LeftSidebar onExpandedChange={setLeftOpen} />
+            <RightSidebar onExpandedChange={setRightOpen} />
+            <Wordmark hiddenForSidebar={leftOpen || rightOpen} />
           </motion.div>
         )}
       </AnimatePresence>

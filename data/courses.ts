@@ -40,9 +40,9 @@ const leftExpandFactor = 3.25;
 export const layout = {
   leftCollapsedWidth,
   leftExpandFactor,
-  /** Right (history) sidebar widths — half the left sidebar's, collapsed & expanded. */
+  /** Right (history) sidebar: slim collapsed strip; expanded wide enough for labels. */
   rightCollapsedWidth: leftCollapsedWidth / 2, // 32
-  rightExpandedWidth: (leftCollapsedWidth * leftExpandFactor) / 2, // 104
+  rightExpandedWidth: 150,
   /** Fraction of screen height the right sidebar occupies (anchored to the bottom). */
   rightHeightRatio: 1,
 } as const;

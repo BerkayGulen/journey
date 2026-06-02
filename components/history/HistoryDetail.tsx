@@ -3,18 +3,23 @@
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { useJourney } from "@/lib/journey-state";
+import { useMediaQuery } from "@/lib/media";
 import CourseColumn from "@/components/history/CourseColumn";
+import CourseRow from "@/components/history/CourseRow";
 
 /**
- * Full-page academic-history detail view. The whole screen fills with
- * full-height course columns (one per course, in its color). Clicking a column
- * widens it and reveals its grade breakdown. Escape or the faint "Journey"
- * wordmark (top-left) returns to the welcome screen — the same return-home
- * affordance the workspace uses.
+ * Full-page academic-history detail view. On wide screens it fills with
+ * full-height course columns (one per course, in its color) that widen on
+ * click; on narrow / mobile screens it switches to a scrollable vertical list
+ * of horizontal course rows that expand downward — same data, layout that
+ * fits the viewport. Escape or the faint "← Journey" wordmark returns to
+ * welcome.
  */
 export default function HistoryDetail() {
   const { selectedSemester, reset } = useJourney();
   const reduced = useReducedMotion();
+  // Below Tailwind's `sm` the columns get too thin to read → switch to rows.
+  const narrow = useMediaQuery("(max-width: 639px)");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // Escape returns to the welcome screen.
@@ -29,33 +34,60 @@ export default function HistoryDetail() {
   if (!selectedSemester) return null;
   const { courses, label } = selectedSemester;
 
+  const toggle = (id: string) =>
+    setExpandedId((cur) => (cur === id ? null : id));
+
   return (
     <div className="relative h-full w-full overflow-hidden bg-background">
-      {/* Columns fill the page. */}
-      <div className="flex h-full w-full">
-        {courses.map((course, i) => (
-          <motion.div
-            key={course.id}
-            className="flex h-full"
-            style={{ flexGrow: 1, flexBasis: 0 }}
-            initial={reduced ? { opacity: 0 } : { opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: reduced ? 0 : 0.5,
-              delay: reduced ? 0 : i * 0.05,
-              ease: "easeOut",
-            }}
-          >
-            <CourseColumn
-              course={course}
-              expanded={expandedId === course.id}
-              onToggle={() =>
-                setExpandedId((cur) => (cur === course.id ? null : course.id))
-              }
-            />
-          </motion.div>
-        ))}
-      </div>
+      {narrow ? (
+        // Mobile: a scrollable vertical list of horizontal course rows, below a
+        // top band that holds the back/title controls.
+        <div className="flex h-full w-full flex-col overflow-y-auto pt-14">
+          {courses.map((course, i) => (
+            <motion.div
+              key={course.id}
+              className="flex w-full flex-none"
+              initial={reduced ? { opacity: 0 } : { opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{
+                duration: reduced ? 0 : 0.45,
+                delay: reduced ? 0 : i * 0.05,
+                ease: "easeOut",
+              }}
+            >
+              <CourseRow
+                course={course}
+                expanded={expandedId === course.id}
+                onToggle={() => toggle(course.id)}
+              />
+            </motion.div>
+          ))}
+        </div>
+      ) : (
+        // Wide: full-height columns that widen in place on click.
+        <div className="flex h-full w-full">
+          {courses.map((course, i) => (
+            <motion.div
+              key={course.id}
+              className="flex h-full"
+              style={{ flexGrow: 1, flexBasis: 0 }}
+              initial={reduced ? { opacity: 0 } : { opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: reduced ? 0 : 0.5,
+                delay: reduced ? 0 : i * 0.05,
+                ease: "easeOut",
+              }}
+            >
+              <CourseColumn
+                course={course}
+                expanded={expandedId === course.id}
+                onToggle={() => toggle(course.id)}
+              />
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* Home — return to the welcome screen (also Escape). Faint wordmark,
           consistent with the workspace's minimal identity. `mix-blend-difference`

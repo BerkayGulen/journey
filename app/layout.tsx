@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Caveat, Inter } from "next/font/google";
 import "./globals.css";
 
@@ -16,6 +16,12 @@ const caveat = Caveat({
 export const metadata: Metadata = {
   title: "Journey",
   description: "An interactive AI learning journey.",
+};
+
+// Ensure mobile devices scale to device width (zoom left enabled for a11y).
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

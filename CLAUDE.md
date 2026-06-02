@@ -79,9 +79,11 @@ Stacking (z-index): aurora background `-z-10` → canvas `z-0` → sidebars `z-1
   mirrors the left's interaction: hover widens the panel + the hovered block grows to reveal its
   label; active blocks open the history view, locked blocks muted/`not-allowed`),
   `ConnectionCanvas`, `Wordmark`.
-- `components/history/` — `HistoryDetail` (full-page semester view: full-height course columns +
-  Escape/`← Journey` return) and `CourseColumn` (per-course column, widen-in-place on click to
-  reveal the grade breakdown). Mounted by `JourneyScreen` when `phase === "history"`.
+- `components/history/` — `HistoryDetail` (full-page semester view + Escape/`← Journey` return).
+  **Responsive:** wide screens render full-height `CourseColumn`s (widen-in-place on click);
+  narrow/mobile (`< sm`, via `useMediaQuery` in `lib/media.ts`) switch to a scrollable vertical
+  list of `CourseRow`s (horizontal bands that expand downward). `GradeBreakdown` is the shared
+  expand panel used by both. Mounted by `JourneyScreen` when `phase === "history"`.
 
 ### Conventions
 
@@ -92,3 +94,10 @@ Stacking (z-index): aurora background `-z-10` → canvas `z-0` → sidebars `z-1
   `connection * 2 + edge`) using `hash01` — never `Math.random` (would flicker per frame).
 - Path alias `@/*` → repo root. `next.config.ts` pins `turbopack.root` (a stray `yarn.lock`
   in the home dir would otherwise misdetect the workspace) and hides the dev indicator.
+- **Mobile/responsive** (work done on the `mobile-responsive` branch): the design is unchanged
+  on desktop. Touch has no hover, so the hover-reveal sidebars use a tap-to-expand pattern —
+  `useCoarsePointer()` (`lib/pointer.ts`, `(hover: none)`) gates the hover handlers off and shows
+  all labels (`forceLabel`) when expanded; first tap expands, second tap acts. The workspace
+  Milestones sidebar is `hidden md:flex`, the wordmark scales down (`text-5xl sm:text-7xl`), and
+  the history view swaps columns→rows below `sm`. Verify mobile with `scripts/drive_mobile.py`
+  (phone viewport + `has_touch`); it also asserts no horizontal overflow.
