@@ -22,7 +22,7 @@ export default function Wordmark({
         src="/icons/journeyLogo.png"
         alt="Journey"
         draggable={false}
-        className="h-16 select-none sm:h-28"
+        className="h-24 select-none sm:h-[10.5rem]"
         animate={
           hide
             ? { opacity: 0 }

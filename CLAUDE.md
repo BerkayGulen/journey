@@ -30,6 +30,10 @@ No test framework is set up. Verification of this visual app is done with **Play
 screenshots**: install once with `python -m pip install playwright && python -m playwright
 install chromium`, then drive `http://localhost:3000` headless and screenshot
 (move the mouse to exercise hover/expand/cursor-bend states). Read the PNG back to inspect.
+Drive scripts (output to `scripts/shots/`, gitignored): `scripts/drive.py` (welcome→workspace),
+`drive_history.py` (history sidebar + detail), `drive_mobile.py` (390×844 + `has_touch`; asserts
+no horizontal overflow), `drive_reduced.py` (reduced-motion). The back control is an image, not
+text — select it with `get_by_label("Back to Journey")`, not `get_by_text`.
 
 Windows gotcha: stray `node` processes can lock `.next` and cause Turbopack
 `os error 1224` ("user-mapped section open"). Fix: kill node (`taskkill /F /IM node.exe /T`)
@@ -68,7 +72,15 @@ Stacking (z-index): aurora background `-z-10` → canvas `z-0` → sidebars `z-1
 - `data/semesters.ts` — **single source of truth** for academic history: `semesters` (8 entries,
   first 3 `active`/completed, rest locked), each active one carrying its `courses` with `grade` +
   `breakdown`. Feeds the right sidebar spine, the history detail view, and the `connections`
-  targets (line endpoints, anchored as `history-{semester.id}`).
+  targets (line endpoints, anchored as `history-{semester.id}`). Holds **two separate palettes**:
+  `semesters[].color` = the 8 right-spine block colors (Butter/Guava/Sunset/Sangria/Moss/Palm/
+  Lagoon/Odyssey); `columnPalette` = the per-course colors of the history-detail columns. Don't conflate.
+- `components/JourneyLogo.tsx` — the handwriting "Journey" wordmark image, used everywhere the word
+  appears (hero `Wordmark`, the workspace + history back buttons). The asset is a transparent-bg PNG
+  (`public/icons/journeyLogo.png`, generated from the supplied JPEG by `scripts/make_logo_png.py`,
+  which keys the white out). Tinted per surface via `tone` ("dark" = black ink for light bgs; "light"
+  = `[filter:invert(1)]` → white ink for dark bgs). A raster logo with a white bg won't blend cleanly
+  on dark/colored surfaces — use the transparent PNG, not blend modes.
 - `lib/geometry.ts` — pure math/color helpers: `controlPoints` (the two bezier control points
   are **independent** per end — that asymmetry is what makes the lines look amorphous),
   `hash01` (deterministic per-line seed → each line gets stable amplitude/phase/speed/offset),
@@ -94,6 +106,14 @@ Stacking (z-index): aurora background `-z-10` → canvas `z-0` → sidebars `z-1
   `connection * 2 + edge`) using `hash01` — never `Math.random` (would flicker per frame).
 - Path alias `@/*` → repo root. `next.config.ts` pins `turbopack.root` (a stray `yarn.lock`
   in the home dir would otherwise misdetect the workspace) and hides the dev indicator.
+- **Responsive sizing follows the viewport, not the pointer.** Gate "mobile" sizes on
+  `useMediaQuery("(max-width: 639px)")` (`lib/media.ts`), NOT `useCoarsePointer()`/`(hover: none)`.
+  A resized desktop window still reports `hover: hover`, so pointer-gated sizes appear to "do
+  nothing" when testing in a browser. Use `useCoarsePointer` (`lib/pointer.ts`) ONLY for
+  hover-vs-tap behavior (the tap-to-expand sidebars).
+- `mix-blend-mode` is cancelled by `opacity < 1` on the same element (opacity creates isolation).
+  For text/logos that must read on any background, prefer a transparent asset + `invert`, or keep
+  opacity at 1 — don't rely on `mix-blend-difference` on a faded element.
 - **Mobile/responsive** (work done on the `mobile-responsive` branch): the design is unchanged
   on desktop. Touch has no hover, so the hover-reveal sidebars use a tap-to-expand pattern —
   `useCoarsePointer()` (`lib/pointer.ts`, `(hover: none)`) gates the hover handlers off and shows
