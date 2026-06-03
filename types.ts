@@ -156,7 +156,7 @@ export interface StudioConnection {
 
 /**
  * One contribution in a contextual discussion. Discussions stay attached to the
- * object they're about (an artifact or a published work) — not a global feed.
+ * object they're about (an artifact or a selected work) — not a global feed.
  */
 export interface ClassroomContribution {
   id: string;
@@ -196,17 +196,66 @@ export interface Assignment {
 }
 
 /**
- * An exemplary student project the instructor has published to the whole class.
- * Becomes a permanent learning resource; students can comment on it.
+ * An instructor-selected *learning moment* from an earlier phase — chosen for its
+ * educational value (insightful research, strong ideation, telling user
+ * observations…), NOT a celebrated final outcome. Surfaced in "Selected Works"
+ * so peers can learn from the process; students can comment on it.
  */
-export interface PublishedWork {
+export interface SelectedWork {
   id: string;
   studentName: string;
   title: string;
   kind: StudioObjectKind;
+  /** Which project phase this moment came from (1-based) + its label. */
+  phase: number;
+  phaseLabel: string;
+  /** What the work shows / why it matters. */
+  description: string;
   /** Thumbnail/accent color (hex). */
   color: string;
-  /** Optional instructor note accompanying the published work. */
-  note?: string;
+  /** Instructor note on why it was selected. */
+  instructorNote?: string;
+  /** Attribution for the note, e.g. "Prof. L. Kavak". */
+  instructorName?: string;
+  tags?: string[];
+  /** Epoch ms — "added on" date in the detail view. */
+  addedOn?: number;
   comments: ClassroomContribution[];
+}
+
+// ── Project brief (the active studio project) ─────────────────────────────
+
+/** One phase of the project brief (deliverables + weight + due date). */
+export interface BriefPhase {
+  /** 1-based phase number. */
+  number: number;
+  title: string;
+  /** e.g. "Week 4". */
+  dueDate: string;
+  /** Percent weight of the final grade. */
+  weight: number;
+  summary: string;
+  deliverables: string[];
+}
+
+/** The active studio project brief — the central assignment reference. */
+export interface ProjectBrief {
+  course: string;
+  title: string;
+  instructors: string[];
+  /** The opening objective paragraphs. */
+  objective: string[];
+  phases: BriefPhase[];
+}
+
+// ── Assignment-space phase timeline ───────────────────────────────────────
+
+/** Where a phase stands in the class's progression. */
+export type PhaseStatus = "completed" | "active" | "locked";
+
+/** One entry in the Assignment Space timeline (where the class currently is). */
+export interface AssignmentPhase {
+  number: number;
+  title: string;
+  status: PhaseStatus;
 }

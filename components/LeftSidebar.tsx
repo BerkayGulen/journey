@@ -13,7 +13,7 @@ import { useAnchorRef } from "@/lib/anchors";
 import { PRIVATE_PORTAL_LAYOUT_ID, useJourney } from "@/lib/journey-state";
 import { useCoarsePointer } from "@/lib/pointer";
 import { useMediaQuery } from "@/lib/media";
-import { readableTextColor } from "@/lib/geometry";
+import { darken, readableTextColor } from "@/lib/geometry";
 import type { Course } from "@/types";
 
 const collapsedWidth = layout.leftCollapsedWidth;
@@ -116,6 +116,11 @@ function SplitPanel({
 }) {
   const reduced = useReducedMotion();
   const text = readableTextColor(course.color);
+  // The Classroom (collective) half uses a deeper variant of the course color so
+  // it reads as distinct from the Private (individual) half while keeping the
+  // course identity. Re-derive its text color against the darker shade.
+  const classroomColor = darken(course.color, 0.18);
+  const classroomText = readableTextColor(classroomColor);
   return (
     <motion.div
       className="absolute inset-0 z-20 flex flex-col"
@@ -124,17 +129,17 @@ function SplitPanel({
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
     >
-      {/* Classroom Chat — the shared design studio. */}
+      {/* Classroom Chat — the shared design studio (deeper course color). */}
       <motion.button
         type="button"
         className="relative w-full flex-1 cursor-pointer"
-        style={{ backgroundColor: course.color }}
+        style={{ backgroundColor: classroomColor }}
         onClick={(e) => {
           e.stopPropagation();
           onClassroom();
         }}
       >
-        <div className="relative px-3 text-center" style={{ color: text }}>
+        <div className="relative px-3 text-center" style={{ color: classroomText }}>
           <div className="text-sm font-semibold tracking-wide">Classroom Chat</div>
           <div className="mt-1 text-[10px] leading-tight opacity-80">
             the shared studio

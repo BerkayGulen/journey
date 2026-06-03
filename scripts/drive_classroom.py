@@ -1,8 +1,9 @@
-"""Playwright drive: walk the welcome → Classroom (shared studio) flow.
+"""Playwright drive: welcome → Classroom (shared amplifier studio) flow.
 
-Exercises all four layers — Studio Wall (pan + click → discussion), Assignment
-Space, Published archive (open → discussion) — then Escape back to welcome.
-Pass --reduced to run under prefers-reduced-motion.
+Exercises the refinement update — darker Classroom split half, portal-logo app
+bar (no arrow), Studio Wall pan + artifact discussion, Assignment Space with the
+Project Brief view + phase timeline, and Selected Works (renamed). Pass --reduced
+to run under prefers-reduced-motion.
 """
 import os
 import sys
@@ -30,7 +31,7 @@ with sync_playwright() as p:
     page.goto("http://localhost:3000", wait_until="networkidle")
     page.wait_for_timeout(700)
 
-    # 1. Expand the left sidebar, click a course → split overlay.
+    # 1. Expand the left sidebar, click a course → split overlay (darker top half).
     page.mouse.move(30, 400)
     page.wait_for_timeout(600)
     page.mouse.click(40, 400)
@@ -40,20 +41,19 @@ with sync_playwright() as p:
     # 2. Choose Classroom Chat (top half) → the studio.
     page.get_by_text("Classroom Chat", exact=True).click()
     page.wait_for_timeout(1000)
-    # Nudge the mouse over the wall to flex the connection lines.
-    page.mouse.move(720, 420)
+    page.mouse.move(720, 440)
     page.wait_for_timeout(700)
     shot(page, "02_studio_wall.png")
 
     # 3. Click an artifact (visible at the centered start) → discussion panel.
-    page.get_by_text("Dyson teardown photos", exact=True).click()
+    page.get_by_text("Megaphone geometry", exact=True).click()
     page.wait_for_timeout(700)
     shot(page, "03_discussion.png")
 
     # 4. Add a thought.
     ta = page.get_by_placeholder("add a thought…")
     ta.click()
-    ta.type("It also keeps the dust visible — that feels intentional.", delay=4)
+    ta.type("A horn flares; a megaphone barely does — yet both shape where the sound goes.", delay=3)
     page.keyboard.press("Enter")
     page.wait_for_timeout(500)
     shot(page, "04_discussion_added.png")
@@ -68,31 +68,39 @@ with sync_playwright() as p:
     page.wait_for_timeout(500)
     shot(page, "05_wall_panned.png")
 
-    # 7. Assignments layer.
+    # 6. Assignments layer — phase timeline + Project Brief button.
     page.get_by_text("Assignments", exact=True).click()
     page.wait_for_timeout(700)
     shot(page, "06_assignments.png")
-    # Upload a revision (mocked).
+
+    # 7. Open the Project Brief, then return.
+    page.get_by_text("Project Brief", exact=True).click()
+    page.wait_for_timeout(600)
+    shot(page, "07_project_brief.png")
+    page.get_by_text("← Back", exact=True).click()
+    page.wait_for_timeout(500)
+
+    # 8. Upload a revision (mocked).
     page.get_by_text("Upload revision", exact=True).first.click()
     page.wait_for_timeout(400)
-    shot(page, "07_assignments_uploaded.png")
+    shot(page, "08_assignment_uploaded.png")
 
-    # 8. Published layer.
-    page.get_by_text("Published", exact=True).click()
+    # 9. Selected Works (renamed) layer.
+    page.get_by_text("Selected Works", exact=True).click()
     page.wait_for_timeout(700)
-    shot(page, "08_published.png")
+    shot(page, "09_selected_works.png")
 
-    # 9. Open a published work → comment.
-    page.get_by_text("Modular Kitchen Scale", exact=True).click()
+    # 10. Open a selected work → detail + instructor note + discussion.
+    page.get_by_text("Amplifier Concept Exploration", exact=True).click()
     page.wait_for_timeout(700)
-    shot(page, "09_published_discussion.png")
+    shot(page, "10_selected_detail.png")
     page.keyboard.press("Escape")
     page.wait_for_timeout(400)
 
-    # 10. Escape again → back to welcome.
+    # 11. Escape again → back to welcome.
     page.keyboard.press("Escape")
     page.wait_for_timeout(900)
-    shot(page, "10_back_to_welcome.png")
+    shot(page, "11_back_to_welcome.png")
 
     browser.close()
     print("done")

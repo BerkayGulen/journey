@@ -113,6 +113,16 @@ export function readableTextColor(hex: string): string {
   return luminance > 0.6 ? "#1a1a1a" : "#ffffff";
 }
 
+/**
+ * Darken a hex color by lowering its lightness by `amount` (0..1). Used to give
+ * the Classroom half of the course split a deeper variant of the course color
+ * (collective learning) vs. the Private half (the original color).
+ */
+export function darken(hex: string, amount = 0.18): string {
+  const { h, s, l } = hexToHsl(hex);
+  return hslToHex(h, s, Math.max(0, l - amount));
+}
+
 /** Parse a hex color into HSL (h in [0,360), s/l in [0,1]). */
 function hexToHsl(hex: string): { h: number; s: number; l: number } {
   const c = hex.replace("#", "");

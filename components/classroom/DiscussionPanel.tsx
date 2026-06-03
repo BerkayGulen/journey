@@ -6,10 +6,22 @@ import { hexToRgba } from "@/lib/geometry";
 import type { ClassroomContribution } from "@/types";
 
 const fmtDate = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
+const fmtFullDate = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+/** Optional detail block (Selected Works): the record above the discussion. */
+export interface DiscussionMeta {
+  phase?: number;
+  phaseLabel?: string;
+  description?: string;
+  instructorNote?: string;
+  instructorName?: string;
+  tags?: string[];
+  addedOn?: number;
+}
 
 /**
  * The Discussion Layer, realized contextually: a calm side sheet showing the
- * conversation attached to one object (an artifact or a published work).
+ * conversation attached to one object (an artifact or a selected work).
  * Contributions are stacked annotations — name, Student/Instructor role,
  * timestamp, text — NOT chat bubbles. A quiet composer adds a thought.
  */
@@ -18,6 +30,7 @@ export default function DiscussionPanel({
   subtitle,
   accent,
   contributions,
+  meta,
   onClose,
   onAdd,
 }: {
@@ -25,6 +38,8 @@ export default function DiscussionPanel({
   subtitle?: string;
   accent: string;
   contributions: ClassroomContribution[];
+  /** When present (Selected Works), renders the record above the thread. */
+  meta?: DiscussionMeta;
   onClose: () => void;
   onAdd: (text: string) => void;
 }) {
@@ -76,6 +91,59 @@ export default function DiscussionPanel({
 
         {/* Thread — stacked annotations, separated by hairlines (no bubbles). */}
         <div className="flex-1 overflow-y-auto px-7">
+          {meta && (
+            <div className="pb-5">
+              {(meta.phaseLabel || meta.phase != null) && (
+                <span
+                  className="inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+                  style={{ backgroundColor: hexToRgba(accent, 0.14), color: accent }}
+                >
+                  {meta.phase != null ? `Phase ${meta.phase}` : ""}
+                  {meta.phase != null && meta.phaseLabel ? " · " : ""}
+                  {meta.phaseLabel ?? ""}
+                </span>
+              )}
+              {meta.description && (
+                <p className="mt-3 text-[14px] leading-relaxed text-foreground/80">{meta.description}</p>
+              )}
+              {meta.instructorNote && (
+                <div
+                  className="mt-4 rounded-2xl border-l-2 px-4 py-3"
+                  style={{ borderColor: accent, backgroundColor: hexToRgba(accent, 0.06) }}
+                >
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: accent }}>
+                    Instructor note
+                  </div>
+                  <p className="mt-1 text-sm italic leading-relaxed text-foreground/75">
+                    “{meta.instructorNote}”
+                  </p>
+                  {meta.instructorName && (
+                    <p className="mt-1.5 text-[11px] text-foreground/45">— {meta.instructorName}</p>
+                  )}
+                </div>
+              )}
+              {meta.tags && meta.tags.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {meta.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full bg-black/[0.05] px-2.5 py-0.5 text-[11px] text-foreground/55"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {meta.addedOn != null && (
+                <p className="mt-4 text-[11px] text-foreground/40">
+                  Added on {fmtFullDate.format(meta.addedOn)}
+                </p>
+              )}
+              <div className="mt-5 text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground/40">
+                Discussion
+              </div>
+            </div>
+          )}
           {contributions.length === 0 ? (
             <p className="py-6 font-hand text-xl italic text-foreground/40">
               No discussion yet — start one.

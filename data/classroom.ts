@@ -1,25 +1,28 @@
 import type {
   Assignment,
+  AssignmentPhase,
   ClassroomContribution,
-  PublishedWork,
+  ProjectBrief,
+  SelectedWork,
   StudioCluster,
   StudioConnection,
   StudioObject,
 } from "@/types";
 
 /**
- * Classroom workspace — the single source of truth for the shared design studio
- * (Studio Wall objects, the discussions attached to them, the private Assignment
- * Space, and the Published Work archive). Mocked but API-ready: swap these for an
- * API response without touching the components.
+ * Classroom workspace — single source of truth for the shared design studio
+ * (Studio Wall objects + their discussions, the private Assignment Space, the
+ * Selected Works archive, the project brief, and the phase timeline). Mocked but
+ * API-ready: swap for an API response without touching the components.
  *
- * Example course: IEU Industrial Design, Product Design Studio II (2nd-year
- * spring). The studio project — "Everyday Tools, Reconsidered" — continues the
- * household-object thread from the Private Chat example.
+ * Active project: IEU Industrial Design, Product Design Studio II (ID 202) —
+ * "Amplifying Sound Through Form": design a PASSIVE, non-electronic mechanical
+ * sound amplifier. The class is in Phase 4; earlier phases are complete, so the
+ * studio reads as a living, actively-taught course.
  *
- * Coordinates (`x`/`y`) are in wall pixels: the wall is a curated, pre-arranged
- * plane the student PANS across (no zoom, no drag). Clusters occupy four regions;
- * `studioConnections` draw relationships with Journey's flowing line language.
+ * Coordinates (`x`/`y`) are wall pixels: the wall is a curated, pre-arranged
+ * plane the student PANS across (no zoom/drag-rearrange). `studioConnections`
+ * draw relationships with Journey's flowing line language.
  */
 
 /** Overall wall plane size (px). Larger than the viewport → pannable. */
@@ -29,8 +32,8 @@ export const WALL = { width: 1840, height: 1240 } as const;
 export const clusters: StudioCluster[] = [
   { id: "brief", label: "Project Brief", color: "#E36559" }, // Sangria
   { id: "precedents", label: "Precedents", color: "#23617E" }, // Odyssey
-  { id: "research", label: "Research & Theory", color: "#657652" }, // Palm
-  { id: "materials", label: "Materials & Process", color: "#C6B63B" }, // Neon Pear
+  { id: "research", label: "Acoustics & Theory", color: "#657652" }, // Palm
+  { id: "materials", label: "Form & Material Tests", color: "#C6B63B" }, // Neon Pear
 ];
 
 const clusterColor = new Map(clusters.map((c) => [c.id, c.color]));
@@ -51,27 +54,27 @@ function obj(
 /** Artifacts pinned to the wall, grouped spatially by cluster region. */
 export const studioObjects: StudioObject[] = [
   // ── Project Brief (top-left) ──────────────────────────────────────────
-  obj("b1", "brief", "Everyday Tools, Reconsidered", "brief", 120, 130, 250, 160, "Studio II brief"),
-  obj("b2", "note", "Semester schedule & milestones", "brief", 150, 360, 210, 120, "instructor"),
-  obj("b3", "note", "Learning objectives", "brief", 400, 300, 200, 120, "instructor"),
+  obj("b1", "brief", "Amplifying Sound Through Form", "brief", 120, 130, 250, 160, "ID 202 · Studio II"),
+  obj("b2", "note", "Phase schedule · Wk 4 · 7 · 11 · 14", "brief", 150, 360, 215, 120, "instructor"),
+  obj("b3", "note", "What makes a horn 'work'?", "brief", 405, 300, 195, 120, "instructor"),
 
   // ── Precedents (top-right) ────────────────────────────────────────────
-  obj("p1", "precedent", "Dieter Rams — ten principles", "precedents", 1040, 120, 230, 160, "Braun"),
-  obj("p2", "image", "Muji kettle study", "precedents", 1340, 130, 200, 140, "MoMA collection"),
-  obj("p3", "image", "Dyson teardown photos", "precedents", 1100, 330, 210, 140, "iFixit"),
-  obj("p4", "precedent", "OXO Good Grips — origin", "precedents", 1400, 340, 220, 150, "case study"),
+  obj("p1", "precedent", "Gramophone horn (1900s)", "precedents", 1040, 120, 230, 150, "design archive"),
+  obj("p2", "image", "Tractrix horn profile", "precedents", 1340, 130, 200, 140, "acoustics"),
+  obj("p3", "image", "Megaphone geometry", "precedents", 1100, 320, 210, 140, "field study"),
+  obj("p4", "precedent", "String-body resonance (violin)", "precedents", 1400, 330, 220, 150, "case study"),
 
-  // ── Research & Theory (bottom-left) ───────────────────────────────────
-  obj("r1", "paper", "Affordances & everyday objects", "research", 120, 690, 240, 150, "Norman, 1988"),
-  obj("r2", "paper", "Emotionally durable design", "research", 150, 900, 210, 140, "Chapman, 2005"),
-  obj("r3", "book", "The Design of Everyday Things", "research", 410, 760, 190, 170, "Norman"),
-  obj("r4", "website", "core77.com — process diaries", "research", 400, 980, 210, 120, "web"),
+  // ── Acoustics & Theory (bottom-left) ──────────────────────────────────
+  obj("r1", "paper", "Horns, chambers & resonance", "research", 120, 690, 240, 150, "Olson, 1957"),
+  obj("r2", "paper", "Impedance matching basics", "research", 150, 900, 210, 140, "acoustics primer"),
+  obj("r3", "book", "Room Acoustics", "research", 410, 760, 190, 170, "Kuttruff"),
+  obj("r4", "website", "Directivity & frequency response", "research", 400, 980, 215, 120, "web"),
 
-  // ── Materials & Process (bottom-right) ────────────────────────────────
-  obj("m1", "image", "Recycled polymer samples", "materials", 1040, 720, 210, 140, "material lab"),
-  obj("m2", "video", "Injection molding walkthrough", "materials", 1340, 720, 230, 150, "video · 6:12"),
-  obj("m3", "image", "Anodized aluminum finishes", "materials", 1100, 930, 200, 130, "material lab"),
-  obj("m4", "note", "Process constraints", "materials", 1400, 940, 190, 120, "instructor"),
+  // ── Form & Material Tests (bottom-right) ──────────────────────────────
+  obj("m1", "image", "Foam reflection mockups", "materials", 1040, 720, 210, 140, "studio lab"),
+  obj("m2", "video", "Casting a tractrix horn", "materials", 1340, 720, 230, 150, "video · 5:48"),
+  obj("m3", "image", "3D-printed test horns", "materials", 1100, 930, 200, 130, "studio lab"),
+  obj("m4", "note", "Material & surface effects", "materials", 1400, 940, 190, 120, "instructor"),
 ];
 
 /**
@@ -82,16 +85,15 @@ export const studioConnections: StudioConnection[] = [
   { fromId: "b1", toId: "p1" },
   { fromId: "b1", toId: "r1" },
   { fromId: "b1", toId: "r3" },
-  { fromId: "r1", toId: "r3" },
-  { fromId: "p4", toId: "r1" },
-  { fromId: "p3", toId: "m2" },
-  { fromId: "m1", toId: "m2" },
-  { fromId: "p2", toId: "m3" },
-  { fromId: "r2", toId: "p1" },
+  { fromId: "r1", toId: "p2" },
+  { fromId: "p1", toId: "p2" },
+  { fromId: "p3", toId: "m1" },
+  { fromId: "m1", toId: "m3" },
+  { fromId: "p2", toId: "m2" },
+  { fromId: "r2", toId: "r1" },
 ];
 
-// Deterministic timestamps (Date.UTC is pure — no Date.now at module scope, so
-// no SSR/hydration drift). Rendered as a short absolute date in the panel.
+// Deterministic timestamps (Date.UTC is pure → no SSR/hydration drift).
 const t = (m: number, d: number, h = 10, min = 0) => Date.UTC(2026, m, d, h, min);
 
 /**
@@ -105,38 +107,38 @@ export const discussions: Record<string, ClassroomContribution[]> = {
       id: "d1",
       author: "Alara Ayrac",
       role: "student",
-      text: "Why was this manufacturing process selected over a simpler one? The part count looks high for a handheld.",
-      createdAt: t(4, 12, 9, 30),
+      text: "A megaphone barely flares yet it still focuses sound — is it the cone angle or the rigidity doing the work?",
+      createdAt: t(2, 12, 9, 30),
     },
     {
       id: "d2",
       author: "Mert Çetin",
       role: "student",
-      text: "I think it's about the motor housing tolerances — molding gives them tighter fits than casting.",
-      createdAt: t(4, 12, 14, 5),
+      text: "Mostly directivity from the cone, I think — it doesn't amplify so much as stop sound spreading sideways.",
+      createdAt: t(2, 12, 14, 5),
     },
     {
       id: "d3",
-      author: "Prof. Selin Aydın",
+      author: "Prof. L. Kavak",
       role: "instructor",
-      text: "Good thread. Trace it back to the brief: which principle is this teardown evidence for?",
-      createdAt: t(4, 13, 8, 15),
+      text: "Good distinction. Hold onto 'direct vs. amplify' — it'll shape your phase-4 form decisions.",
+      createdAt: t(2, 13, 8, 15),
     },
   ],
   p1: [
     {
       id: "d4",
-      author: "Prof. Selin Aydın",
+      author: "Prof. L. Kavak",
       role: "instructor",
-      text: "Pick one principle and argue where a product you own fails it. Bring it to Thursday's pin-up.",
-      createdAt: t(4, 10, 11, 0),
+      text: "Trace why early gramophones needed such a long horn. The answer is impedance matching — see Olson.",
+      createdAt: t(2, 10, 11, 0),
     },
     {
       id: "d5",
-      author: "Deniz Korkmaz",
+      author: "Derin Korkmaz",
       role: "student",
-      text: "“As little design as possible” keeps catching me — most of my sketches are doing too much.",
-      createdAt: t(4, 11, 16, 40),
+      text: "The exponential flare is doing a lot — the curve isn't decorative, it's tuned to the frequency range.",
+      createdAt: t(2, 11, 16, 40),
     },
   ],
   r1: [
@@ -144,108 +146,246 @@ export const discussions: Record<string, ClassroomContribution[]> = {
       id: "d6",
       author: "Alara Ayrac",
       role: "student",
-      text: "The affordance idea reframed my whole problem — the cord isn't a feature to style, it's a false affordance.",
-      createdAt: t(4, 14, 10, 20),
+      text: "Olson reframed it for me: the horn is a transformer between a tiny vibrating source and the open air.",
+      createdAt: t(2, 14, 10, 20),
     },
   ],
   b1: [
     {
       id: "d7",
-      author: "Prof. Selin Aydın",
+      author: "Prof. L. Kavak",
       role: "instructor",
-      text: "Read the brief as a question, not a spec. What is an 'everyday tool' actually asking of its user?",
-      createdAt: t(3, 28, 9, 0),
+      text: "Read the brief as a constraint, not a limit: no electronics forces you to design the acoustics, not buy them.",
+      createdAt: t(1, 28, 9, 0),
     },
   ],
 };
 
 /**
+ * The active studio project brief — the central assignment reference, opened
+ * from the "Project Brief" button in the Assignment Space.
+ */
+export const projectBrief: ProjectBrief = {
+  course: "ID 202 — Industrial Design Studio II",
+  title: "Amplifying Sound Through Form",
+  instructors: ["Assoc. Prof. Dr. X", "Asst. Prof. Dr. Y"],
+  objective: [
+    "The objective of this studio is to design a passive sound amplifier that enhances sound without using electricity or electronic components.",
+    "Today, sound amplification is almost always associated with speakers, batteries, and digital technology. However, sound can also be amplified through geometry, material properties, and resonance. Before electronic amplification became common, people used physical forms such as horns, chambers, and resonant bodies to increase and direct sound.",
+    "In this project, students are expected to explore the relationship between sound, form, material, and user experience through the design of a mechanically functioning sound amplifier.",
+  ],
+  phases: [
+    {
+      number: 1,
+      title: "Research & Exploration",
+      dueDate: "Week 4",
+      weight: 20,
+      summary:
+        "Investigate existing examples of passive sound amplification and explore the fundamentals of acoustics.",
+      deliverables: ["Research Board", "User & Context Analysis", "Material Exploration", "Desk Research"],
+    },
+    {
+      number: 2,
+      title: "Problem Definition & Concept Development",
+      dueDate: "Week 7",
+      weight: 20,
+      summary:
+        "Define a design opportunity and develop multiple concept directions — identify target user, usage scenario, design criteria, and product positioning.",
+      deliverables: ["Design Brief", "User Scenario", "Minimum 3 Concept Alternatives", "Sketch Models"],
+    },
+    {
+      number: 3,
+      title: "Design Development",
+      dueDate: "Week 11",
+      weight: 20,
+      summary:
+        "Select one concept and develop its form, functionality, and user experience. Test acoustic performance and usability physically.",
+      deliverables: ["Refined Concept", "Concept Sketches", "CAD Development", "Material Proposal", "Functional Mock-ups"],
+    },
+    {
+      number: 4,
+      title: "Final Project",
+      dueDate: "Week 14",
+      weight: 40,
+      summary:
+        "Present a fully developed passive sound amplifier demonstrating acoustics, form development, manufacturing considerations, and user interaction.",
+      deliverables: [
+        "Final Presentation Board",
+        "Process Documentation",
+        "Physical Prototype",
+        "CAD Model",
+        "Technical Drawings",
+      ],
+    },
+  ],
+};
+
+/**
+ * Where the class currently stands. Drives the Assignment Space timeline. (This
+ * 5-step progression is the studio's working rhythm; the 4-phase grading brief
+ * above is the formal reference — both per the project doc.)
+ */
+export const assignmentPhases: AssignmentPhase[] = [
+  { number: 1, title: "Research", status: "completed" },
+  { number: 2, title: "Research Synthesis", status: "completed" },
+  { number: 3, title: "Concept Development", status: "completed" },
+  { number: 4, title: "Design Development", status: "active" },
+  { number: 5, title: "Final Presentation", status: "locked" },
+];
+
+/**
  * The student's OWN assignments (private Assignment Space). Peers' submissions
- * are never visible here — this is a private channel with the instructor only.
+ * are never visible here — a private channel with the instructor only. Uploads
+ * are mocked (session-only). "Research Synthesis" is listed first (the Project
+ * Brief button sits directly above it).
  */
 export const myAssignments: Assignment[] = [
   {
     id: "a1",
     title: "Research Synthesis",
-    brief: "Synthesize your precedent study and user research into a one-page problem framing.",
+    brief: "Synthesize your acoustic precedent study and user research into a one-page problem framing.",
     submissions: [
-      { id: "s1", label: "Synthesis board v1", kind: "image", version: 1, createdAt: t(4, 6, 23, 10), status: "reviewed" },
-      { id: "s2", label: "Synthesis board v2", kind: "image", version: 2, createdAt: t(4, 13, 21, 45), status: "reviewed" },
+      { id: "s1", label: "Synthesis board v1", kind: "image", version: 1, createdAt: t(2, 6, 23, 10), status: "reviewed" },
+      { id: "s2", label: "Synthesis board v2", kind: "image", version: 2, createdAt: t(2, 13, 21, 45), status: "reviewed" },
     ],
     feedback:
-      "Strong framing in v2. The false-affordance angle is the sharpest thing here — build the concept work on it.",
+      "Strong framing in v2. The 'direct vs. amplify' distinction is the sharpest thing here — carry it into concept work.",
   },
   {
     id: "a2",
     title: "Concept Development",
-    brief: "Present three divergent concepts as boards. Sketches and quick models welcome.",
+    brief: "Three divergent amplifier concepts as boards, with sketch models. Show the acoustic logic of each.",
     submissions: [
-      { id: "s3", label: "Concept sketches v1", kind: "image", version: 1, createdAt: t(4, 20, 22, 30), status: "in-review" },
+      { id: "s3", label: "Three concepts v1", kind: "image", version: 1, createdAt: t(3, 2, 22, 30), status: "reviewed" },
     ],
+    feedback: "Concept B (the folded path) is the most promising — least obvious, most to learn from. Push it.",
   },
   {
     id: "a3",
-    title: "Final Prototype & Boards",
-    brief: "Working prototype, process documentation, and final presentation boards for the jury.",
-    submissions: [],
+    title: "Design Development",
+    brief: "Refine one concept: form, CAD, material proposal, and functional mock-ups tested for acoustic performance.",
+    submissions: [
+      { id: "s4", label: "Refined concept v1", kind: "image", version: 1, createdAt: t(4, 1, 20, 0), status: "in-review" },
+    ],
   },
 ];
 
 /**
- * Exemplary student work the instructor published to the whole class. Permanent
- * learning resources; students can open and comment on them.
+ * Instructor-selected learning moments from completed phases (NOT final
+ * outcomes) — chosen for educational value so peers can learn from the process.
+ * The class is in Phase 4, so these come from Phases 1–3.
  */
-export const publishedWorks: PublishedWork[] = [
+export const selectedWorks: SelectedWork[] = [
   {
-    id: "pw1",
-    studentName: "Deniz Korkmaz",
-    title: "Modular Kitchen Scale",
-    kind: "image",
+    id: "sw1",
+    studentName: "Aylin Demir",
+    title: "User Observation Map",
+    kind: "note",
+    phase: 1,
+    phaseLabel: "User Observation",
+    description:
+      "A well-documented observation map showing how people instinctively cup their hands around phones and laptops when trying to increase volume.",
     color: "#E89C73",
-    note: "Published for its restraint — every part earns its place. A clear answer to Rams' tenth principle.",
+    instructorNote: "Excellent behavioral insight that can inform physical amplification strategies.",
+    instructorName: "Prof. L. Kavak",
+    tags: ["behavior", "sound", "observation", "user research"],
+    addedOn: t(2, 12),
     comments: [
       {
-        id: "c1",
+        id: "swc1",
         author: "Alara Ayrac",
         role: "student",
-        text: "The way the tray doubles as the lid is so quiet. How did you land on that?",
-        createdAt: t(4, 26, 12, 0),
+        text: "The hand-cupping gesture is such an honest starting point — people already build tiny horns without thinking.",
+        createdAt: t(2, 26, 12, 0),
       },
     ],
   },
   {
-    id: "pw2",
-    studentName: "Eylül Demir",
-    title: "Foldable Drying Rack",
-    kind: "image",
-    color: "#94BEBB",
-    note: "Excellent material reasoning — the recycled-polymer hinge study is exemplary process work.",
+    id: "sw2",
+    studentName: "Derin Korkmaz",
+    title: "Horn Geometry Study",
+    kind: "paper",
+    phase: 2,
+    phaseLabel: "Research Synthesis",
+    description:
+      "A comparative study of horn geometries (exponential, tractrix, conical, rectangular, folded) and their acoustic amplification principles.",
+    color: "#657652",
+    instructorNote: "Strong visual organization and synthesis of technical research.",
+    instructorName: "Prof. L. Kavak",
+    tags: ["research", "acoustics", "horn design", "amplification"],
+    addedOn: t(2, 12),
     comments: [],
   },
   {
-    id: "pw3",
-    studentName: "Can Yıldız",
-    title: "Tactile Measuring Cup",
+    id: "sw3",
+    studentName: "Maya Chen",
+    title: "Amplifier Concept Exploration",
     kind: "image",
-    color: "#C6B63B",
-    note: "An affordance-led project done right: you can read the volume without looking.",
+    phase: 3,
+    phaseLabel: "Sketch Exploration",
+    description:
+      "A sketch sheet containing over 40 amplifier concepts exploring folding, spiraling, and directional sound pathways.",
+    color: "#23617E",
+    instructorNote: "Exceptional breadth of ideation before committing to a concept.",
+    instructorName: "Prof. L. Kavak",
+    tags: ["sketch", "ideation", "amplifier", "concept generation"],
+    addedOn: t(2, 12),
     comments: [
       {
-        id: "c2",
-        author: "Prof. Selin Aydın",
+        id: "swc2",
+        author: "Prof. L. Kavak",
         role: "instructor",
-        text: "Note the iteration trail in Can's boards — three honest dead-ends before the ridges worked.",
-        createdAt: t(4, 27, 9, 30),
+        text: "Note how many ideas Maya let go of — quantity here bought the confidence to commit later.",
+        createdAt: t(2, 27, 9, 30),
       },
     ],
   },
   {
-    id: "pw4",
-    studentName: "Mira Aslan",
-    title: "Repairable Hand Blender",
+    id: "sw4",
+    studentName: "Can Yıldız",
+    title: "Foam Reflection Mock-ups",
     kind: "image",
+    phase: 3,
+    phaseLabel: "Form Development",
+    description:
+      "A sequence of physical foam mock-ups testing sound reflection angles, directionality, and amplification through rapid prototyping.",
+    color: "#C6B63B",
+    instructorNote: "Excellent use of rapid prototyping to test assumptions.",
+    instructorName: "Prof. L. Kavak",
+    tags: ["prototyping", "foam model", "acoustics", "testing"],
+    addedOn: t(2, 10),
+    comments: [],
+  },
+  {
+    id: "sw5",
+    studentName: "Selin Arı",
+    title: "Material Resonance Tests",
+    kind: "image",
+    phase: 1,
+    phaseLabel: "Material Exploration",
+    description:
+      "A tactile catalogue tapping woods, metals, and ceramics to compare how each material rings, sustains, and colors a tone.",
     color: "#8B162B",
-    note: "Designed for disassembly. A strong stance on emotional durability — keep, don't discard.",
+    instructorNote: "A curious, hands-on approach — let the material findings steer the form, not the reverse.",
+    instructorName: "Prof. L. Kavak",
+    tags: ["material", "resonance", "exploration"],
+    addedOn: t(1, 30),
+    comments: [],
+  },
+  {
+    id: "sw6",
+    studentName: "Kerem Aksoy",
+    title: "Gramophone Precedent Analysis",
+    kind: "precedent",
+    phase: 2,
+    phaseLabel: "Precedent Analysis",
+    description:
+      "A teardown of an early gramophone, annotating how the horn length and flare tune the perceived loudness across frequencies.",
+    color: "#94BEBB",
+    instructorNote: "Reads the object like an engineer and a historian at once — exactly the right depth.",
+    instructorName: "Prof. L. Kavak",
+    tags: ["precedent", "history", "horn", "analysis"],
+    addedOn: t(2, 4),
     comments: [],
   },
 ];
