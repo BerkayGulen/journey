@@ -95,21 +95,27 @@ export default function BlobField({
   const reduced = useReducedMotion();
   const morph = useMorph(mode === "adversarial", reduced);
 
-  // Filter scalars interpolated soft (0) → sharp (1).
-  const baseFreq = lerp(0.009, 0.052, morph).toFixed(4);
-  const octaves = Math.round(lerp(2, 4, morph));
-  const dispScale = lerp(42, 82, morph);
-  const blur = lerp(14, 1.4, morph);
+  // Filter scalars interpolated soft (0) → sharp (1). The sharp (Adversarial)
+  // end stays deliberately low-frequency with real blur so the field reads as
+  // *morphed and blended* rather than grainy/blotchy — the tension comes from
+  // larger, more agitated lobes (more displacement, less blur than Socratic),
+  // not fine speckled noise.
+  const baseFreq = lerp(0.009, 0.018, morph).toFixed(4);
+  const octaves = Math.round(lerp(2, 3, morph));
+  const dispScale = lerp(42, 60, morph);
+  const blur = lerp(14, 7, morph);
   const blend = morph > 0.5 ? "screen" : "multiply";
 
+  // Lighter, softer falloff at the sharp end so the blob blends into the dark
+  // background instead of sitting as a dense, hard-edged mass.
   const gradient = (color: string, cy: number) =>
     `radial-gradient(circle at 50% ${cy}%, ${hexToRgba(
       color,
-      lerp(0.85, 0.95, morph),
-    )} 0%, ${hexToRgba(color, lerp(0.45, 0.6, morph))} 33%, ${hexToRgba(
+      lerp(0.85, 0.82, morph),
+    )} 0%, ${hexToRgba(color, lerp(0.45, 0.42, morph))} 38%, ${hexToRgba(
       color,
       0,
-    )} 69%)`;
+    )} ${lerp(69, 76, morph)}%)`;
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">

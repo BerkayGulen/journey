@@ -13,12 +13,12 @@ import { semesters } from "@/data/semesters";
  * Each block has a persistent color; the code appears on hover.
  */
 export const currentCourses: Course[] = [
-  { id: "ffd202", code: "FFD 202", name: "İleri Tasarım Sunum Teknikleri", color: "#8B162B" }, // Crimson Ink
-  { id: "id202", code: "ID 202", name: "Ürün Tasarım Stüdyosu II", color: "#F9B6B8" }, // Dusty Rose
-  { id: "id204", code: "ID 204", name: "Endüstriyel Tasarımda Göstergebilim", color: "#C6B63B" }, // Neon Pear
-  { id: "id208", code: "ID 208", name: "Üretim Teknolojileri", color: "#F6F3CF" }, // Cosmic Latte
-  { id: "pool003", code: "POOL 003", name: "GED - Sosyal Bilimler A: İktisadi Bilimler", color: "#BAD2E8" }, // Arctic Blue
-  { id: "sfl202", code: "SFL 202", name: "İkinci Yabancı Diller IV", color: "#F37521" }, // Burnt Sienna
+  { id: "ffd202", code: "FFD 202", name: "Advanced Design Presentation Techniques", color: "#8B162B" }, // Crimson Ink
+  { id: "id202", code: "ID 202", name: "Product Design Studio II", color: "#F9B6B8" }, // Dusty Rose
+  { id: "id204", code: "ID 204", name: "Semiotics in Industrial Design", color: "#C6B63B" }, // Neon Pear
+  { id: "id208", code: "ID 208", name: "Manufacturing Technologies", color: "#F6F3CF" }, // Cosmic Latte
+  { id: "geec207", code: "GEEC 207", name: "Economic History", color: "#BAD2E8" }, // Arctic Blue
+  { id: "itl202", code: "ITL 202", name: "Italian Language IV", color: "#F37521" }, // Burnt Sienna
 ];
 
 /**
