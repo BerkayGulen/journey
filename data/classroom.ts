@@ -273,23 +273,24 @@ export const myAssignments: Assignment[] = [
 /**
  * Instructor-selected learning moments from completed phases (NOT final
  * outcomes) — chosen for educational value so peers can learn from the process.
- * The class is in Phase 4, so these come from Phases 1–3.
+ * The class is in Phase 4, so these come from Phases 1–3. Each is a full board
+ * image (the description, instructor note, and tags are baked into the image);
+ * clicking opens it full-size.
  */
 export const selectedWorks: SelectedWork[] = [
   {
     id: "sw1",
     studentName: "Aylin Demir",
     title: "User Observation Map",
-    kind: "note",
     phase: 1,
     phaseLabel: "User Observation",
+    image: "/assets/aylin-demir.jpeg",
+    color: "#E89C73",
     description:
       "A well-documented observation map showing how people instinctively cup their hands around phones and laptops when trying to increase volume.",
-    color: "#E89C73",
     instructorNote: "Excellent behavioral insight that can inform physical amplification strategies.",
     instructorName: "Prof. L. Kavak",
     tags: ["behavior", "sound", "observation", "user research"],
-    addedOn: t(2, 12),
     comments: [
       {
         id: "swc1",
@@ -304,32 +305,30 @@ export const selectedWorks: SelectedWork[] = [
     id: "sw2",
     studentName: "Derin Korkmaz",
     title: "Horn Geometry Study",
-    kind: "paper",
     phase: 2,
     phaseLabel: "Research Synthesis",
+    image: "/assets/derin-korkmaz.jpeg",
+    color: "#657652",
     description:
       "A comparative study of horn geometries (exponential, tractrix, conical, rectangular, folded) and their acoustic amplification principles.",
-    color: "#657652",
     instructorNote: "Strong visual organization and synthesis of technical research.",
     instructorName: "Prof. L. Kavak",
     tags: ["research", "acoustics", "horn design", "amplification"],
-    addedOn: t(2, 12),
     comments: [],
   },
   {
     id: "sw3",
     studentName: "Maya Chen",
     title: "Amplifier Concept Exploration",
-    kind: "image",
     phase: 3,
     phaseLabel: "Sketch Exploration",
+    image: "/assets/maya-chen.jpeg",
+    color: "#23617E",
     description:
       "A sketch sheet containing over 40 amplifier concepts exploring folding, spiraling, and directional sound pathways.",
-    color: "#23617E",
     instructorNote: "Exceptional breadth of ideation before committing to a concept.",
     instructorName: "Prof. L. Kavak",
     tags: ["sketch", "ideation", "amplifier", "concept generation"],
-    addedOn: t(2, 12),
     comments: [
       {
         id: "swc2",
@@ -344,48 +343,15 @@ export const selectedWorks: SelectedWork[] = [
     id: "sw4",
     studentName: "Can Yıldız",
     title: "Foam Reflection Mock-ups",
-    kind: "image",
     phase: 3,
     phaseLabel: "Form Development",
+    image: "/assets/can-yildiz.jpeg",
+    color: "#C6B63B",
     description:
       "A sequence of physical foam mock-ups testing sound reflection angles, directionality, and amplification through rapid prototyping.",
-    color: "#C6B63B",
     instructorNote: "Excellent use of rapid prototyping to test assumptions.",
     instructorName: "Prof. L. Kavak",
     tags: ["prototyping", "foam model", "acoustics", "testing"],
-    addedOn: t(2, 10),
-    comments: [],
-  },
-  {
-    id: "sw5",
-    studentName: "Selin Arı",
-    title: "Material Resonance Tests",
-    kind: "image",
-    phase: 1,
-    phaseLabel: "Material Exploration",
-    description:
-      "A tactile catalogue tapping woods, metals, and ceramics to compare how each material rings, sustains, and colors a tone.",
-    color: "#8B162B",
-    instructorNote: "A curious, hands-on approach — let the material findings steer the form, not the reverse.",
-    instructorName: "Prof. L. Kavak",
-    tags: ["material", "resonance", "exploration"],
-    addedOn: t(1, 30),
-    comments: [],
-  },
-  {
-    id: "sw6",
-    studentName: "Kerem Aksoy",
-    title: "Gramophone Precedent Analysis",
-    kind: "precedent",
-    phase: 2,
-    phaseLabel: "Precedent Analysis",
-    description:
-      "A teardown of an early gramophone, annotating how the horn length and flare tune the perceived loudness across frequencies.",
-    color: "#94BEBB",
-    instructorNote: "Reads the object like an engineer and a historian at once — exactly the right depth.",
-    instructorName: "Prof. L. Kavak",
-    tags: ["precedent", "history", "horn", "analysis"],
-    addedOn: t(2, 4),
     comments: [],
   },
 ];

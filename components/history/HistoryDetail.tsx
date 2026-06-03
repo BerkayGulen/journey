@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { useJourney } from "@/lib/journey-state";
 import { useMediaQuery } from "@/lib/media";
-import JourneyLogo from "@/components/JourneyLogo";
+import JourneyMark from "@/components/JourneyMark";
 import CourseColumn from "@/components/history/CourseColumn";
 import CourseRow from "@/components/history/CourseRow";
 
@@ -48,13 +48,12 @@ export default function HistoryDetail() {
             type="button"
             onClick={reset}
             aria-label="Back to Journey"
-            className="flex items-center gap-2 outline-none"
+            className="flex items-center outline-none"
             initial={{ opacity: 0.85 }}
             whileHover={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
-            <span className="font-hand text-2xl italic text-foreground/70">←</span>
-            <JourneyLogo tone="dark" className="h-8" />
+            <JourneyMark tone="dark" className="h-8 w-8" />
           </motion.button>
           <span className="font-hand text-base italic text-foreground/55">{label}</span>
         </header>
@@ -116,13 +115,12 @@ export default function HistoryDetail() {
         type="button"
         onClick={reset}
         aria-label="Back to Journey"
-        className="absolute left-7 top-4 z-20 flex items-center gap-2 outline-none"
+        className="absolute left-7 top-4 z-20 flex items-center outline-none"
         initial={{ opacity: 0.75 }}
         whileHover={{ opacity: 1 }}
         transition={{ duration: 0.4, ease: "easeInOut" }}
       >
-        <span className="font-hand text-4xl italic text-white mix-blend-difference">←</span>
-        <JourneyLogo tone="light" className="h-16" />
+        <JourneyMark tone="light" className="h-12 w-12" />
       </motion.button>
 
       <div className="pointer-events-none absolute right-7 top-5 z-20 font-hand text-xl italic text-white opacity-70 mix-blend-difference">

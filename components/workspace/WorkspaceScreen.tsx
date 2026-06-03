@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useJourney } from "@/lib/journey-state";
 import { aiInk } from "@/lib/geometry";
-import JourneyLogo from "@/components/JourneyLogo";
+import JourneyMark from "@/components/JourneyMark";
 import BlobField from "@/components/workspace/BlobField";
 import IdeaDumpIntro from "@/components/workspace/IdeaDumpIntro";
 import ConversationView from "@/components/workspace/ConversationView";
@@ -65,7 +65,7 @@ export default function WorkspaceScreen() {
         whileHover={{ opacity: 1 }}
         transition={{ duration: 0.4, ease: "easeInOut" }}
       >
-        <JourneyLogo tone={adversarial ? "light" : "dark"} className="h-12 sm:h-16" />
+        <JourneyMark tone={adversarial ? "light" : "dark"} className="h-10 w-10 sm:h-12 sm:w-12" />
       </motion.button>
 
       <AnimatePresence mode="wait">

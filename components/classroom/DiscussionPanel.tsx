@@ -6,24 +6,26 @@ import { hexToRgba } from "@/lib/geometry";
 import type { ClassroomContribution } from "@/types";
 
 const fmtDate = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
-const fmtFullDate = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
-/** Optional detail block (Selected Works): the record above the discussion. */
+/** Optional record block (Selected Works): the board image + note above the thread. */
 export interface DiscussionMeta {
   phase?: number;
   phaseLabel?: string;
+  /** Board image (public path) — shown clickable to open full-size. */
+  image?: string;
   description?: string;
   instructorNote?: string;
   instructorName?: string;
   tags?: string[];
-  addedOn?: number;
 }
 
 /**
  * The Discussion Layer, realized contextually: a calm side sheet showing the
  * conversation attached to one object (an artifact or a selected work).
  * Contributions are stacked annotations — name, Student/Instructor role,
- * timestamp, text — NOT chat bubbles. A quiet composer adds a thought.
+ * timestamp, text — NOT chat bubbles. A quiet composer adds a thought. For
+ * Selected Works, an optional `meta` block (board image + note + tags) sits
+ * above the thread; clicking the image calls `onImageClick` (opens full-size).
  */
 export default function DiscussionPanel({
   title,
@@ -31,6 +33,7 @@ export default function DiscussionPanel({
   accent,
   contributions,
   meta,
+  onImageClick,
   onClose,
   onAdd,
 }: {
@@ -38,8 +41,8 @@ export default function DiscussionPanel({
   subtitle?: string;
   accent: string;
   contributions: ClassroomContribution[];
-  /** When present (Selected Works), renders the record above the thread. */
   meta?: DiscussionMeta;
+  onImageClick?: () => void;
   onClose: () => void;
   onAdd: (text: string) => void;
 }) {
@@ -93,9 +96,28 @@ export default function DiscussionPanel({
         <div className="flex-1 overflow-y-auto px-7">
           {meta && (
             <div className="pb-5">
+              {meta.image && (
+                <button
+                  type="button"
+                  onClick={onImageClick}
+                  className="group relative block w-full overflow-hidden rounded-2xl border border-black/10 outline-none"
+                  aria-label="View full size"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={meta.image}
+                    alt={title}
+                    draggable={false}
+                    className="aspect-[3/2] w-full object-cover"
+                  />
+                  <span className="absolute bottom-2 right-2 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-medium text-white opacity-0 transition-opacity group-hover:opacity-100">
+                    view full size
+                  </span>
+                </button>
+              )}
               {(meta.phaseLabel || meta.phase != null) && (
                 <span
-                  className="inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+                  className="mt-4 inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
                   style={{ backgroundColor: hexToRgba(accent, 0.14), color: accent }}
                 >
                   {meta.phase != null ? `Phase ${meta.phase}` : ""}
@@ -133,11 +155,6 @@ export default function DiscussionPanel({
                     </span>
                   ))}
                 </div>
-              )}
-              {meta.addedOn != null && (
-                <p className="mt-4 text-[11px] text-foreground/40">
-                  Added on {fmtFullDate.format(meta.addedOn)}
-                </p>
               )}
               <div className="mt-5 text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground/40">
                 Discussion

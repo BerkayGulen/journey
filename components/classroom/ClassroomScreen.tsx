@@ -12,11 +12,12 @@ import {
 } from "@/data/classroom";
 import { profile } from "@/data/workspace";
 import type { ClassroomContribution, SelectedWork, StudioObject } from "@/types";
-import PortalLogo from "@/components/classroom/PortalLogo";
+import JourneyMark from "@/components/JourneyMark";
 import LayerNav, { type ClassroomLayer } from "@/components/classroom/LayerNav";
 import StudioWall from "@/components/classroom/StudioWall";
 import AssignmentSpace from "@/components/classroom/AssignmentSpace";
 import SelectedWorks from "@/components/classroom/SelectedWorks";
+import SelectedWorkLightbox from "@/components/classroom/SelectedWorkLightbox";
 import DiscussionPanel from "@/components/classroom/DiscussionPanel";
 
 const clusterLabel = new Map(clusters.map((c) => [c.id, c.label]));
@@ -25,11 +26,12 @@ let contribSeq = 0;
 /**
  * The Classroom workspace — a shared design studio for the selected course.
  * Knowledge is organized spatially (the Studio Wall); discussions stay attached
- * to objects; assignments are a private channel; exemplary learning moments live
- * in Selected Works. A fixed app bar (portal logo + layer nav) sits above the
- * content so scrolling layers pass cleanly beneath it. The portal logo (and
- * Escape) return to the welcome screen; Escape first closes an open discussion.
- * Student perspective.
+ * to objects; assignments are a private channel; instructor-picked learning
+ * moments live in Selected Works (a board image + the discussion around it,
+ * clickable to view full-size). A fixed app bar (portal mark + layer nav) sits
+ * above the content so scrolling layers pass cleanly beneath it. The portal mark
+ * (and Escape) return to the welcome screen; Escape first closes a full-size
+ * board, then an open discussion. Student perspective.
  */
 export default function ClassroomScreen() {
   const { selectedCourse, reset } = useJourney();
@@ -43,6 +45,7 @@ export default function ClassroomScreen() {
   const [layer, setLayer] = useState<ClassroomLayer>("wall");
   const [openObjectId, setOpenObjectId] = useState<string | null>(null);
   const [openSelectedId, setOpenSelectedId] = useState<string | null>(null);
+  const [fullImage, setFullImage] = useState(false);
 
   // Session-local copies so discussions/comments persist while the studio is open.
   const [objectThreads, setObjectThreads] = useState<Record<string, ClassroomContribution[]>>(
@@ -53,37 +56,31 @@ export default function ClassroomScreen() {
   const closePanels = useCallback(() => {
     setOpenObjectId(null);
     setOpenSelectedId(null);
+    setFullImage(false);
   }, []);
 
-  // Escape closes an open discussion first, otherwise returns to welcome.
+  // Escape closes a full-size board first, then an open discussion, else returns
+  // to the welcome screen.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      if (openObjectId || openSelectedId) closePanels();
+      if (fullImage) setFullImage(false);
+      else if (openObjectId || openSelectedId) closePanels();
       else reset();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [openObjectId, openSelectedId, closePanels, reset]);
+  }, [fullImage, openObjectId, openSelectedId, closePanels, reset]);
 
   const newContribution = (text: string): ClassroomContribution => {
     contribSeq += 1;
-    return {
-      id: `local${contribSeq}`,
-      author: profile.name,
-      role: "student",
-      text,
-      createdAt: Date.now(),
-    };
+    return { id: `local${contribSeq}`, author: profile.name, role: "student", text, createdAt: Date.now() };
   };
 
   const addToObject = (text: string) => {
     if (!openObjectId) return;
     const id = openObjectId;
-    setObjectThreads((prev) => ({
-      ...prev,
-      [id]: [...(prev[id] ?? []), newContribution(text)],
-    }));
+    setObjectThreads((prev) => ({ ...prev, [id]: [...(prev[id] ?? []), newContribution(text)] }));
   };
 
   const addToSelected = (text: string) => {
@@ -121,17 +118,17 @@ export default function ClassroomScreen() {
 
       {/* App bar — stays put while layers scroll beneath it. */}
       <header className="absolute inset-x-0 top-0 z-30 flex h-16 items-center gap-3 border-b border-black/5 bg-background/85 px-4 backdrop-blur-md sm:px-7">
-        {/* Portal logo — return to the welcome screen (also Escape). */}
+        {/* Portal mark — return to the welcome screen (also Escape). */}
         <motion.button
           type="button"
           onClick={reset}
           aria-label="Back to Journey"
-          className="shrink-0 text-foreground/80 outline-none"
+          className="shrink-0 outline-none"
           initial={{ opacity: 0.85 }}
           whileHover={{ opacity: 1, rotate: reduced ? 0 : -6 }}
           transition={{ duration: 0.4, ease: "easeInOut" }}
         >
-          <PortalLogo className="h-9 w-9" />
+          <JourneyMark tone="dark" className="h-9 w-9" />
         </motion.button>
 
         <div className="flex flex-1 justify-center">
@@ -148,6 +145,7 @@ export default function ClassroomScreen() {
         )}
       </header>
 
+      {/* Contextual discussion (Studio Wall artifacts). */}
       <AnimatePresence>
         {openObject && (
           <DiscussionPanel
@@ -160,24 +158,40 @@ export default function ClassroomScreen() {
             onAdd={addToObject}
           />
         )}
+      </AnimatePresence>
+
+      {/* Selected Work — the board image + its discussion. */}
+      <AnimatePresence>
         {openSelected && (
           <DiscussionPanel
             key={`sel-${openSelected.id}`}
             title={openSelected.title}
-            subtitle={`${openSelected.studentName} · ${openSelected.kind}`}
+            subtitle={`${openSelected.studentName} · ${openSelected.phaseLabel}`}
             accent={openSelected.color}
             contributions={openSelected.comments}
             meta={{
               phase: openSelected.phase,
               phaseLabel: openSelected.phaseLabel,
+              image: openSelected.image,
               description: openSelected.description,
               instructorNote: openSelected.instructorNote,
               instructorName: openSelected.instructorName,
               tags: openSelected.tags,
-              addedOn: openSelected.addedOn,
             }}
+            onImageClick={() => setFullImage(true)}
             onClose={closePanels}
             onAdd={addToSelected}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Full-size Selected Work board (opened from the panel image). */}
+      <AnimatePresence>
+        {openSelected && fullImage && (
+          <SelectedWorkLightbox
+            key={`full-${openSelected.id}`}
+            work={openSelected}
+            onClose={() => setFullImage(false)}
           />
         )}
       </AnimatePresence>

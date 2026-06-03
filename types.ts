@@ -205,21 +205,21 @@ export interface SelectedWork {
   id: string;
   studentName: string;
   title: string;
-  kind: StudioObjectKind;
   /** Which project phase this moment came from (1-based) + its label. */
   phase: number;
   phaseLabel: string;
+  /** The board image (public path) — card cover + opened full-size on click. */
+  image: string;
+  /** Accent color (hex) for the card frame / phase tag. */
+  color: string;
   /** What the work shows / why it matters. */
   description: string;
-  /** Thumbnail/accent color (hex). */
-  color: string;
   /** Instructor note on why it was selected. */
   instructorNote?: string;
   /** Attribution for the note, e.g. "Prof. L. Kavak". */
   instructorName?: string;
   tags?: string[];
-  /** Epoch ms — "added on" date in the detail view. */
-  addedOn?: number;
+  /** Peer/instructor discussion attached to this work. */
   comments: ClassroomContribution[];
 }
 

@@ -84,14 +84,17 @@ Stacking (z-index): aurora background `-z-10` → canvas `z-0` → sidebars `z-1
   graded phases), `assignmentPhases` (the 5-step timeline with `completed`/`active`/`locked`),
   `myAssignments` (the student's OWN work only), `selectedWorks` (instructor-picked *learning
   moments* from earlier phases — NOT final outcomes; renamed from "Published Work" — don't
-  reintroduce that term). `WALL` = the pannable plane size. Timestamps use `Date.UTC(...)` (pure →
+  reintroduce that term — each points to a full board `image` in `public/assets/`). `WALL` = the pannable plane size. Timestamps use `Date.UTC(...)` (pure →
   no SSR drift), formatted as a short date. Mocked but API-ready.
-- `components/JourneyLogo.tsx` — the handwriting "Journey" wordmark image, used everywhere the word
-  appears (hero `Wordmark`, the workspace + history back buttons). The asset is a transparent-bg PNG
-  (`public/icons/journeyLogo.png`, generated from the supplied JPEG by `scripts/make_logo_png.py`,
-  which keys the white out). Tinted per surface via `tone` ("dark" = black ink for light bgs; "light"
-  = `[filter:invert(1)]` → white ink for dark bgs). A raster logo with a white bg won't blend cleanly
-  on dark/colored surfaces — use the transparent PNG, not blend modes.
+- **Two logos.** (1) The handwriting "Journey" wordmark — only the hero welcome screen
+  (`Wordmark.tsx` renders `/icons/journeyLogo.png` directly; `JourneyLogo.tsx` is the same asset as a
+  tintable component, currently unused). (2) `components/JourneyMark.tsx` — the **round** "Journey"
+  mark (`/icons/logo.png`), the portal-home / back control **everywhere off the main page**: the
+  Classroom app bar, the Private Chat workspace, and the history detail (no back arrow anywhere — the
+  mark is the control). Both PNGs are transparent (white keyed out: `scripts/make_logo_png.py` for
+  the wordmark, `scripts/make_mark_png.py` for the round mark) and tint per surface via `tone`
+  ("dark" = black ink for light bgs; "light" = `[filter:invert(1)]` → white ink for dark bgs). Use the
+  transparent PNG + invert, never blend modes, so it reads on any background.
 - `lib/geometry.ts` — pure math/color helpers: `controlPoints` (the two bezier control points
   are **independent** per end — that asymmetry is what makes the lines look amorphous),
   `hash01` (deterministic per-line seed → each line gets stable amplitude/phase/speed/offset),
@@ -102,7 +105,8 @@ Stacking (z-index): aurora background `-z-10` → canvas `z-0` → sidebars `z-1
   mirrors the left's interaction: hover widens the panel + the hovered block grows to reveal its
   label; active blocks open the history view, locked blocks muted/`not-allowed`),
   `ConnectionCanvas`, `Wordmark`.
-- `components/history/` — `HistoryDetail` (full-page semester view + Escape/`← Journey` return).
+- `components/history/` — `HistoryDetail` (full-page semester view; Escape or the top-left Journey
+  logo returns — no back arrow).
   **Responsive:** wide screens render full-height `CourseColumn`s (widen-in-place on click);
   narrow/mobile (`< sm`, via `useMediaQuery` in `lib/media.ts`) switch to a scrollable vertical
   list of `CourseRow`s (horizontal bands that expand downward). `GradeBreakdown` is the shared
@@ -121,11 +125,13 @@ Stacking (z-index): aurora background `-z-10` → canvas `z-0` → sidebars `z-1
   `studio-{id}` and `StudioCanvas` draws the flowing lines, reading live panned rects exactly like
   `ConnectionCanvas`), **Assignment Space** (`AssignmentSpace` = private/own-only, with a prominent
   **Project Brief** button → full `ProjectBriefView` reading overlay, a **phase timeline**, and mocked
-  uploads), **Selected Works** (`SelectedWorks` = gallery of learning moments; opens the panel to
-  comment). **Discussion** (`DiscussionPanel`) is a contextual side sheet attached to the clicked
-  object — stacked **annotations with role tags, NOT chat bubbles**; an optional `meta` block renders
-  the Selected-Work record (phase, description, instructor note + attribution, tags, date) above the
-  thread. **Accent legibility:** `ClassroomScreen` falls back to a deep ink when
+  uploads), **Selected Works** (`SelectedWorks` = gallery of student *board images* from
+  `public/assets/`; clicking a card opens a `DiscussionPanel` showing the board image + note + the
+  comment thread; clicking the image opens `SelectedWorkLightbox` full-size). **Discussion**
+  (`DiscussionPanel`) is a contextual side sheet — stacked **annotations with role tags + a composer,
+  NOT chat bubbles** — used by both Studio Wall objects (plain) and Selected Works (with an optional
+  `meta` block: board image, phase, description, instructor note, tags). **Accent legibility:**
+  `ClassroomScreen` falls back to a deep ink when
   `readableTextColor(courseColor) !== "#fff"` (light course colors can't carry white chrome).
 
 ### Conventions
