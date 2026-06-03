@@ -10,6 +10,7 @@ import RightSidebar from "@/components/RightSidebar";
 import Wordmark from "@/components/Wordmark";
 import WorkspaceScreen from "@/components/workspace/WorkspaceScreen";
 import HistoryDetail from "@/components/history/HistoryDetail";
+import ClassroomScreen from "@/components/classroom/ClassroomScreen";
 
 /**
  * Phase-driven composition. The welcome layers and the Private Chat workspace
@@ -30,6 +31,7 @@ function Stage() {
   const showWelcome = phase === "welcome" || phase === "splitting" || phase === "entering";
   const showWorkspace =
     phase === "entering" || phase === "ideaDump" || phase === "conversing";
+  const showClassroom = phase === "classroom";
   const showHistory = phase === "history";
 
   return (
@@ -62,6 +64,21 @@ function Stage() {
             transition={{ duration: dur, ease: "easeInOut" }}
           >
             <WorkspaceScreen />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showClassroom && (
+          <motion.div
+            key="classroom"
+            className="absolute inset-0 z-30"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: dur, ease: "easeInOut" }}
+          >
+            <ClassroomScreen />
           </motion.div>
         )}
       </AnimatePresence>

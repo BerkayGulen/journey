@@ -124,22 +124,20 @@ function SplitPanel({
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
     >
-      {/* Classroom Chat — visible but a stub ("defined later"). */}
+      {/* Classroom Chat — the shared design studio. */}
       <motion.button
         type="button"
-        className="relative w-full flex-1 cursor-default"
+        className="relative w-full flex-1 cursor-pointer"
         style={{ backgroundColor: course.color }}
         onClick={(e) => {
           e.stopPropagation();
           onClassroom();
         }}
       >
-        {/* Scrim so it reads as the inactive / not-yet half. */}
-        <div className="absolute inset-0 bg-black/35" aria-hidden />
         <div className="relative px-3 text-center" style={{ color: text }}>
           <div className="text-sm font-semibold tracking-wide">Classroom Chat</div>
-          <div className="mt-1 text-[10px] tracking-[0.2em] uppercase opacity-70">
-            soon
+          <div className="mt-1 text-[10px] leading-tight opacity-80">
+            the shared studio
           </div>
         </div>
       </motion.button>

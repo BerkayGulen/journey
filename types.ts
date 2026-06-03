@@ -102,3 +102,111 @@ export interface Conversation {
   messages: ChatMessage[];
   mode: AiMode;
 }
+
+// ── Classroom workspace (shared design studio) ────────────────────────────
+
+/** Who a Classroom participant is. Drives the small role tag on contributions. */
+export type ParticipantRole = "student" | "instructor";
+
+/** The kind of artifact pinned to the Studio Wall (sets its small glyph/label). */
+export type StudioObjectKind =
+  | "brief"
+  | "paper"
+  | "image"
+  | "video"
+  | "website"
+  | "book"
+  | "precedent"
+  | "note";
+
+/** A themed grouping of Studio Wall objects (project phase / topic / objective). */
+export interface StudioCluster {
+  id: string;
+  label: string;
+  /** Cluster accent color (hex) — tints its objects and halo. */
+  color: string;
+}
+
+/**
+ * One object pinned to the Studio Wall. Position (`x`/`y`) and size (`w`/`h`)
+ * are in wall coordinates (px) — the wall is a curated, pre-arranged plane the
+ * student pans across. Connections between objects are drawn with Journey's
+ * flowing line language (see `studioConnections`).
+ */
+export interface StudioObject {
+  id: string;
+  kind: StudioObjectKind;
+  title: string;
+  /** Optional source / author / origin line (e.g. "MoMA", "instructor"). */
+  source?: string;
+  clusterId: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  /** Persistent object color (hex) — usually the cluster's color. */
+  color: string;
+}
+
+/** A relationship between two Studio Wall objects, drawn as an organic line. */
+export interface StudioConnection {
+  fromId: string;
+  toId: string;
+}
+
+/**
+ * One contribution in a contextual discussion. Discussions stay attached to the
+ * object they're about (an artifact or a published work) — not a global feed.
+ */
+export interface ClassroomContribution {
+  id: string;
+  author: string;
+  role: ParticipantRole;
+  text: string;
+  /** Epoch ms — rendered as a relative timestamp. */
+  createdAt: number;
+}
+
+/** Review state of a student's assignment submission. */
+export type SubmissionStatus = "submitted" | "in-review" | "reviewed";
+
+/** One uploaded version of an assignment (revisions stack up over time). */
+export interface Submission {
+  id: string;
+  /** What was uploaded, e.g. "Concept boards v2". */
+  label: string;
+  kind: StudioObjectKind;
+  /** 1-based revision number. */
+  version: number;
+  createdAt: number;
+  status: SubmissionStatus;
+}
+
+/**
+ * A student's own assignment in the private Assignment Space. The student sees
+ * ONLY their own submissions; peers' work is never visible here.
+ */
+export interface Assignment {
+  id: string;
+  title: string;
+  brief: string;
+  submissions: Submission[];
+  /** Optional private instructor feedback (only on the student's own work). */
+  feedback?: string;
+}
+
+/**
+ * An exemplary student project the instructor has published to the whole class.
+ * Becomes a permanent learning resource; students can comment on it.
+ */
+export interface PublishedWork {
+  id: string;
+  studentName: string;
+  title: string;
+  kind: StudioObjectKind;
+  /** Thumbnail/accent color (hex). */
+  color: string;
+  /** Optional instructor note accompanying the published work. */
+  note?: string;
+  comments: ClassroomContribution[];
+}

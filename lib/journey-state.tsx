@@ -29,6 +29,7 @@ export type JourneyPhase =
   | "entering" // Private chosen — welcome animating out, workspace in
   | "ideaDump" // immersive intro: student blob + free-form brain dump
   | "conversing" // turns exchanged with the AI
+  | "classroom" // full-page shared design studio (Classroom workspace)
   | "history"; // full-page academic-history detail view (semester columns)
 
 /** How long the welcome→workspace cross-transition is given to play. */
@@ -54,7 +55,7 @@ interface JourneyValue {
   // animated layers can hang their enter/exit off these calls.
   selectCourse(course: Course): void; // welcome → splitting
   choosePrivate(): void; // splitting → entering → ideaDump
-  chooseClassroom(): void; // stub (Classroom Chat defined later)
+  chooseClassroom(): void; // splitting → classroom (shared design studio)
   cancelSplit(): void; // splitting → welcome
   openHistory(semester: Semester): void; // welcome → history (active semester)
   submitFirstDump(text: string): void; // ideaDump → conversing
@@ -105,10 +106,11 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const chooseClassroom = useCallback(() => {
-    // TODO(classroom): Classroom Chat flow is defined later in the brief.
-    // For now this is a no-op stub — selecting it does not leave the welcome.
-    cancelSplit();
-  }, [cancelSplit]);
+    // Enter the shared design studio for the selected course (its color identity
+    // carries through via `selectedCourse`). Internal layer navigation lives in
+    // the Classroom screen's local state, not here.
+    setPhase("classroom");
+  }, []);
 
   // ── Welcome → history (academic-history detail) ────────────────────────
   const openHistory = useCallback((semester: Semester) => {

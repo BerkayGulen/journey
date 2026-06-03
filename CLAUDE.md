@@ -31,8 +31,9 @@ screenshots**: install once with `python -m pip install playwright && python -m 
 install chromium`, then drive `http://localhost:3000` headless and screenshot
 (move the mouse to exercise hover/expand/cursor-bend states). Read the PNG back to inspect.
 Drive scripts (output to `scripts/shots/`, gitignored): `scripts/drive.py` (welcome→workspace),
-`drive_history.py` (history sidebar + detail), `drive_mobile.py` (390×844 + `has_touch`; asserts
-no horizontal overflow), `drive_reduced.py` (reduced-motion). The back control is an image, not
+`drive_history.py` (history sidebar + detail), `drive_classroom.py` (welcome→classroom studio: pan
++ artifact discussion + assignments + published; takes `--reduced`), `drive_mobile.py` (390×844 +
+`has_touch`; asserts no horizontal overflow), `drive_reduced.py` (reduced-motion). The back control is an image, not
 text — select it with `get_by_label("Back to Journey")`, not `get_by_text`.
 
 Windows gotcha: stray `node` processes can lock `.next` and cause Turbopack
@@ -75,6 +76,12 @@ Stacking (z-index): aurora background `-z-10` → canvas `z-0` → sidebars `z-1
   targets (line endpoints, anchored as `history-{semester.id}`). Holds **two separate palettes**:
   `semesters[].color` = the 8 right-spine block colors (Butter/Guava/Sunset/Sangria/Moss/Palm/
   Lagoon/Odyssey); `columnPalette` = the per-course colors of the history-detail columns. Don't conflate.
+- `data/classroom.ts` — **single source of truth** for the Classroom workspace (the shared design
+  studio): `clusters` (4 themed groups), `studioObjects` (artifacts placed spatially in wall px via
+  `x/y/w/h`), `studioConnections` (object→object pairs the studio canvas draws), `discussions`
+  (keyed by object id), `myAssignments` (the student's OWN work only), `publishedWorks`. `WALL`
+  = the pannable plane size. Timestamps use `Date.UTC(...)` (pure → no SSR drift), formatted as a
+  short date in the panel. Mocked but API-ready.
 - `components/JourneyLogo.tsx` — the handwriting "Journey" wordmark image, used everywhere the word
   appears (hero `Wordmark`, the workspace + history back buttons). The asset is a transparent-bg PNG
   (`public/icons/journeyLogo.png`, generated from the supplied JPEG by `scripts/make_logo_png.py`,
@@ -96,6 +103,19 @@ Stacking (z-index): aurora background `-z-10` → canvas `z-0` → sidebars `z-1
   narrow/mobile (`< sm`, via `useMediaQuery` in `lib/media.ts`) switch to a scrollable vertical
   list of `CourseRow`s (horizontal bands that expand downward). `GradeBreakdown` is the shared
   expand panel used by both. Mounted by `JourneyScreen` when `phase === "history"`.
+- `components/classroom/` — the **Classroom workspace** (a shared *design studio*, NOT a chat feed),
+  entered from the top half of the course split (`chooseClassroom()` → `phase === "classroom"`,
+  inheriting the selected course's color). `ClassroomScreen` owns local layer nav + open-discussion
+  state (kept out of the global machine, like history) and Escape (closes an open panel first, else
+  `reset()`). Four layers: **Studio Wall** (`StudioWall` = a curated, pre-arranged plane you *pan*
+  by dragging the background — no zoom/rearrange; `ArtifactCard`s register `studio-{id}` and
+  `StudioCanvas` draws the flowing lines between related objects, reading live panned rects exactly
+  like `ConnectionCanvas`), **Discussion** (`DiscussionPanel` = a contextual side sheet attached to
+  the clicked object — stacked **annotations with role tags, NOT chat bubbles**; shared by wall +
+  published), **Assignment Space** (`AssignmentSpace` = private, the student's OWN submissions only,
+  mocked uploads), **Published** (`PublishedArchive` = class-visible gallery, opens the same panel
+  to comment). `LayerNav` is text-only. **Accent legibility:** light course colors can't carry white
+  chrome — `ClassroomScreen` falls back to a deep ink when `readableTextColor(courseColor) !== "#fff"`.
 
 ### Conventions
 
