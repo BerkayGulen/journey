@@ -228,7 +228,7 @@ export default function ClassroomScreen() {
       {/* Hint, only on the studio wall. */}
       {studio && layer === "wall" && (
         <motion.div
-          className="pointer-events-none absolute bottom-5 left-1/2 z-20 -translate-x-1/2 font-hand text-base italic text-foreground/35"
+          className="pointer-events-none absolute bottom-5 left-1/2 z-20 -translate-x-1/2 font-hand text-base text-foreground/35"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: reduced ? 0 : 0.8, delay: reduced ? 0 : 0.6 }}

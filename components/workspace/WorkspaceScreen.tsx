@@ -81,9 +81,10 @@ export default function WorkspaceScreen() {
         <JourneyMark tone={adversarial ? "light" : "dark"} className="h-10 w-10 sm:h-12 sm:w-12" />
       </motion.button>
 
-      {/* Course identity — top-right, matching the Classroom app bar. Hidden
-          while the Milestones panel is open (it owns the right column then). */}
-      {chatActive && selectedCourse && !milestonesOpen && (
+      {/* Course identity — top-right, matching the Classroom app bar. Shown for
+          every course across the whole Private Chat (idea-dump → conversation →
+          recorded), and hidden only while the Milestones panel owns the column. */}
+      {(phase === "ideaDump" || chatActive) && selectedCourse && !milestonesOpen && (
         <motion.div
           className="absolute right-7 top-6 z-20 hidden text-right sm:block"
           initial={{ opacity: 0 }}

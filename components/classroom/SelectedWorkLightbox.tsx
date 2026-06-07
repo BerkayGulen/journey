@@ -29,7 +29,7 @@ export default function SelectedWorkLightbox({
         type="button"
         onClick={onClose}
         aria-label="Close"
-        className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 font-hand text-2xl italic leading-none text-white outline-none transition-colors hover:bg-white/25"
+        className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 font-hand text-2xl leading-none text-white outline-none transition-colors hover:bg-white/25"
       >
         ×
       </button>

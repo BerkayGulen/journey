@@ -86,7 +86,7 @@ export default function DiscussionPanel({
             type="button"
             onClick={onClose}
             aria-label="Close discussion"
-            className="-mr-1 -mt-1 rounded-full px-2 py-1 font-hand text-2xl italic leading-none text-foreground/50 outline-none transition-colors hover:text-foreground"
+            className="-mr-1 -mt-1 rounded-full px-2 py-1 font-hand text-2xl leading-none text-foreground/50 outline-none transition-colors hover:text-foreground"
           >
             ×
           </button>
@@ -162,7 +162,7 @@ export default function DiscussionPanel({
             </div>
           )}
           {contributions.length === 0 ? (
-            <p className="py-6 font-hand text-xl italic text-foreground/40">
+            <p className="py-6 font-hand text-xl text-foreground/40">
               No discussion yet — start one.
             </p>
           ) : (

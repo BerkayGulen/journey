@@ -55,7 +55,7 @@ export default function HistoryDetail() {
           >
             <JourneyMark tone="dark" className="h-8 w-8" />
           </motion.button>
-          <span className="font-hand text-base italic text-foreground/55">{label}</span>
+          <span className="font-hand text-base text-foreground/55">{label}</span>
         </header>
 
         <div className="flex flex-1 flex-col overflow-y-auto">
@@ -123,7 +123,7 @@ export default function HistoryDetail() {
         <JourneyMark tone="light" className="h-12 w-12" />
       </motion.button>
 
-      <div className="pointer-events-none absolute right-7 top-5 z-20 font-hand text-xl italic text-white opacity-70 mix-blend-difference">
+      <div className="pointer-events-none absolute right-7 top-5 z-20 font-hand text-xl text-white">
         {label}
       </div>
     </div>

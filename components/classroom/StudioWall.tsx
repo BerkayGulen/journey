@@ -88,7 +88,7 @@ export default function StudioWall({
                 }}
               />
               <span
-                className="absolute left-6 top-4 font-hand text-2xl italic"
+                className="absolute left-6 top-4 font-hand text-2xl"
                 style={{ color: hexToRgba(c.color, 0.7) }}
               >
                 {c.label}

@@ -53,7 +53,7 @@ export default function AssignmentSpace({ accent }: { accent: string }) {
   return (
     <div className="absolute inset-0 overflow-y-auto">
       <div className="mx-auto max-w-2xl px-6 pb-20 pt-28 sm:pt-32">
-        <h2 className="font-hand text-4xl italic text-foreground">Assignment Space</h2>
+        <h2 className="font-hand text-4xl text-foreground">Assignment Space</h2>
         <p className="mt-2 max-w-prose text-sm leading-relaxed text-foreground/55">
           A private space between you and your instructor. Only your own work appears here —
           no one else sees your submissions before reviews.
@@ -73,7 +73,7 @@ export default function AssignmentSpace({ accent }: { accent: string }) {
             <span className="block text-sm font-semibold uppercase tracking-[0.18em]">Project Brief</span>
             <span className="mt-0.5 block text-xs opacity-80">{projectBrief.title}</span>
           </span>
-          <span className="font-hand text-2xl italic opacity-90">open →</span>
+          <span className="font-hand text-2xl opacity-90">open →</span>
         </button>
 
         <div className="mt-6 space-y-6">
@@ -204,7 +204,7 @@ function ProjectBriefView({ accent, onBack }: { accent: string; onBack: () => vo
         <button
           type="button"
           onClick={onBack}
-          className="font-hand text-xl italic text-foreground/55 outline-none transition-colors hover:text-foreground"
+          className="font-hand text-xl text-foreground/55 outline-none transition-colors hover:text-foreground"
         >
           ← Back
         </button>
