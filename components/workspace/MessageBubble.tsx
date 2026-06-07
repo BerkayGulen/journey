@@ -30,8 +30,10 @@ export default function MessageBubble({
   const tint = isStudent ? studentColor : aiColor;
 
   const radius = socratic ? "1.6rem" : "0.3rem";
-  const bgAlpha = isStudent ? (socratic ? 0.18 : 0.26) : socratic ? 0.12 : 0.2;
-  const borderAlpha = socratic ? 0.28 : 0.7;
+  // Argument mode keeps the sharp shape but a lighter fill/border, so the colors
+  // sit quietly on the dark background instead of glowing.
+  const bgAlpha = isStudent ? (socratic ? 0.18 : 0.15) : socratic ? 0.12 : 0.11;
+  const borderAlpha = socratic ? 0.28 : 0.42;
   const textColor = socratic ? "rgba(26,26,26,0.9)" : "rgba(245,245,245,0.92)";
 
   return (

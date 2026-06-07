@@ -12,10 +12,14 @@ import {
 
 /**
  * The workspace right sidebar: the design-process Milestones, a Resources
- * section, and the student's profile footer. At rest it lists the milestone
- * titles; hovering expands the active milestone (Problem Definition) to reveal
- * its sub-steps. Colors adapt to the current mode so it stays legible on both
- * the light (Socratic) and dark (Adversarial) backgrounds.
+ * section, and the student's profile footer. Colors adapt to the current mode
+ * so it stays legible on both the light (Socratic) and dark (Adversarial)
+ * backgrounds.
+ *
+ * Collapsed by default — only a three-line handle shows at the top-right. The
+ * user opens the full panel by clicking it; clicking the handle again (or the
+ * close control) collapses it back. Once open, hovering expands the active
+ * milestone (Problem Definition) to reveal its sub-steps.
  *
  * Mounted only during the conversation (kept out of the immersive idea-dump).
  */
@@ -23,6 +27,7 @@ export default function WorkspaceSidebar() {
   const { mode } = useJourney();
   const reduced = useReducedMotion();
   const adversarial = mode === "adversarial";
+  const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
 
   const heading = adversarial ? "text-white/85" : "text-foreground/85";
@@ -32,18 +37,66 @@ export default function WorkspaceSidebar() {
     ? "border-white/10 bg-white/[0.04]"
     : "border-foreground/10 bg-foreground/[0.03]";
   const avatarBorder = adversarial ? "border-white/30" : "border-foreground/25";
+  const line = adversarial ? "bg-white/70" : "bg-foreground/55";
 
   return (
-    <motion.aside
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      initial={reduced ? { opacity: 0 } : { opacity: 0, x: 24 }}
-      animate={reduced ? { opacity: 1 } : { opacity: 1, x: 0 }}
-      exit={reduced ? { opacity: 0 } : { opacity: 0, x: 24 }}
-      transition={{ duration: reduced ? 0.2 : 0.6, ease: "easeOut" }}
-      className={`absolute right-0 top-0 z-10 hidden h-full w-60 flex-col justify-between border-l px-6 py-8 backdrop-blur-md transition-colors duration-700 md:flex ${panel}`}
-    >
-      <div className="flex flex-col gap-6">
+    <>
+      {/* Collapsed handle — three lines, top-right. The only thing visible at
+          rest; clicking it opens the panel. */}
+      <AnimatePresence>
+        {!open && (
+          <motion.button
+            key="ws-sidebar-handle"
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-label="Open milestones"
+            className="absolute right-7 top-7 z-20 hidden flex-col gap-[5px] p-1 outline-none md:flex"
+            initial={reduced ? { opacity: 0 } : { opacity: 0, x: 12 }}
+            animate={reduced ? { opacity: 1 } : { opacity: 1, x: 0 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, x: 12 }}
+            transition={{ duration: reduced ? 0.2 : 0.4, ease: "easeOut" }}
+            whileHover={reduced ? undefined : { scale: 1.06 }}
+          >
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className={`h-[2px] w-6 rounded-full transition-colors duration-700 ${line}`}
+              />
+            ))}
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {open && (
+          <motion.aside
+            key="ws-sidebar-panel"
+            onHoverStart={() => setHovered(true)}
+            onHoverEnd={() => setHovered(false)}
+            initial={reduced ? { opacity: 0 } : { opacity: 0, x: 24 }}
+            animate={reduced ? { opacity: 1 } : { opacity: 1, x: 0 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, x: 24 }}
+            transition={{ duration: reduced ? 0.2 : 0.6, ease: "easeOut" }}
+            className={`absolute right-0 top-0 z-10 hidden h-full w-60 flex-col justify-between border-l px-6 py-8 backdrop-blur-md transition-colors duration-700 md:flex ${panel}`}
+          >
+            {/* Close control — collapses back to the three-line handle. */}
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Close milestones"
+              className={`absolute right-5 top-7 flex flex-col gap-[5px] p-1 outline-none transition-opacity duration-300 hover:opacity-100 ${
+                adversarial ? "opacity-70" : "opacity-60"
+              }`}
+            >
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className={`h-[2px] w-6 rounded-full transition-colors duration-700 ${line}`}
+                />
+              ))}
+            </button>
+
+            <div className="flex flex-col gap-6">
         {/* Milestones */}
         <section>
           <h2
@@ -129,6 +182,9 @@ export default function WorkspaceSidebar() {
           </div>
         </div>
       </div>
-    </motion.aside>
+          </motion.aside>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

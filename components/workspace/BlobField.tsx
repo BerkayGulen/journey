@@ -111,8 +111,8 @@ export default function BlobField({
   const gradient = (color: string, cy: number) =>
     `radial-gradient(circle at 50% ${cy}%, ${hexToRgba(
       color,
-      lerp(0.85, 0.82, morph),
-    )} 0%, ${hexToRgba(color, lerp(0.45, 0.42, morph))} 38%, ${hexToRgba(
+      lerp(0.85, 0.55, morph),
+    )} 0%, ${hexToRgba(color, lerp(0.45, 0.26, morph))} 38%, ${hexToRgba(
       color,
       0,
     )} ${lerp(69, 76, morph)}%)`;
