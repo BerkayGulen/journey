@@ -22,7 +22,7 @@ Motion, imported from `motion/react`).
 ## Commands
 
 - `npm run dev` — dev server (Turbopack) at http://localhost:3000
-- `npm run build` — production build (also the only TypeScript type-check; there is no separate `tsc` script)
+- `npm run build` — production build (full type-check). To type-check WITHOUT touching `.next` (e.g. while `npm run dev` is running), use `npx tsc --noEmit` — there's no `tsc` script, but this avoids the `.next` lock.
 - `npm run lint` — ESLint (flat config, `eslint.config.mjs`)
 - `npm start` — serve a production build
 
@@ -35,13 +35,21 @@ Drive scripts (output to `scripts/shots/`, gitignored): `scripts/drive.py` (welc
 + artifact discussion + assignments + selected works; takes `--reduced`), `drive_course_types.py`
 (studio vs non-studio Classroom: announcements/accordion assignments/placeholder selected-works +
 empty states; uses `reduced_motion` to freeze the sidebar carousel so courses sit at fixed y
-positions — see the script header), `drive_mobile.py` (390×844 +
+positions — see below), `drive_recorded.py` (ID 202 read-only recorded Private Chat; asserts other
+courses still open the idea-dump), `drive_pc_label.py` (Private Chat course label: hide-on-
+Milestones-open + dark-bg legibility), `drive_mobile.py` (390×844 +
 `has_touch`; asserts no horizontal overflow), `drive_reduced.py` (reduced-motion). The back control is an image, not
 text — select it with `get_by_label("Back to Journey")`, not `get_by_text`.
+To select a specific left-sidebar course deterministically, run with `reduced_motion="reduce"` (freezes
+the carousel) and click x≈12 at a fixed y — at 1440×810: FFD202≈67 · ID202≈202 · ID204≈337 · ID208≈472 ·
+GEEC207≈607 · ITL202≈742.
 
 Windows gotcha: stray `node` processes can lock `.next` and cause Turbopack
 `os error 1224` ("user-mapped section open"). Fix: kill node (`taskkill /F /IM node.exe /T`)
 and `rm -rf .next`. Don't run `npm run build` and `npm run dev` against the same `.next` at once.
+
+PowerShell gotcha: multi-line commit messages via `@'…'@` here-strings can mis-parse (commit fails with
+"did not match any file(s)"); write the message to a temp file and `git commit -F <file>` instead.
 
 ## Core architecture — read before editing the visuals
 
@@ -104,10 +112,10 @@ Stacking (z-index): aurora background `-z-10` → canvas `z-0` → sidebars `z-1
   tintable component, currently unused). (2) `components/JourneyMark.tsx` — the **round** "Journey"
   mark (`/icons/logo.png`), the portal-home / back control **everywhere off the main page**: the
   Classroom app bar, the Private Chat workspace, and the history detail (no back arrow anywhere — the
-  mark is the control). Both PNGs are transparent (white keyed out: `scripts/make_logo_png.py` for
-  the wordmark, `scripts/make_mark_png.py` for the round mark) and tint per surface via `tone`
-  ("dark" = black ink for light bgs; "light" = `[filter:invert(1)]` → white ink for dark bgs). Use the
-  transparent PNG + invert, never blend modes, so it reads on any background.
+  mark is the control). Both PNGs are transparent black ink: the wordmark `journeyLogo.png` is supplied
+  pre-transparent (no build step); the round mark is white-keyed by `scripts/make_mark_png.py`. They
+  tint per surface via `tone` ("dark" = black ink for light bgs; "light" = `[filter:invert(1)]` → white
+  ink for dark bgs). Use the transparent PNG + invert, never blend modes, so it reads on any background.
 - `lib/geometry.ts` — pure math/color helpers: `controlPoints` (the two bezier control points
   are **independent** per end — that asymmetry is what makes the lines look amorphous),
   `hash01` (deterministic per-line seed → each line gets stable amplitude/phase/speed/offset),
