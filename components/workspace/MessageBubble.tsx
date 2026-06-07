@@ -45,7 +45,7 @@ export default function MessageBubble({
       className={isStudent ? "flex justify-end" : "flex justify-start"}
     >
       <div
-        className="max-w-[86%] px-5 py-3 text-[15px] leading-relaxed backdrop-blur-sm transition-[background-color,border-color,border-radius,color] duration-700 ease-in-out"
+        className="max-w-[86%] px-5 py-3 text-[15px] leading-relaxed whitespace-pre-line backdrop-blur-sm transition-[background-color,border-color,border-radius,color] duration-700 ease-in-out"
         style={{
           borderRadius: radius,
           background: hexToRgba(tint, bgAlpha),

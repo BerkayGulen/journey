@@ -109,6 +109,33 @@ export interface Conversation {
   mode: AiMode;
 }
 
+// ── Recorded Private Chat (ID 202 read-only demo) ─────────────────────────
+
+/**
+ * One recorded message in a read-only Private Chat transcript. Like a
+ * `ChatMessage` but static (no streaming) and authored offline. `text` may
+ * contain line breaks (rendered with `whitespace-pre-line`).
+ */
+export interface RecordedMessage {
+  kind: "message";
+  role: MessageRole;
+  text: string;
+  /** The AI register this turn was recorded in — drives section jumps. */
+  mode: AiMode;
+}
+
+/**
+ * An inline marker showing a milestone Journey generated at this point in the
+ * conversation (tied to the Problem Definition sub-steps).
+ */
+export interface RecordedMilestone {
+  kind: "milestone";
+  label: string;
+}
+
+/** One item in a recorded transcript: a message or a milestone marker. */
+export type RecordedItem = RecordedMessage | RecordedMilestone;
+
 // ── Classroom workspace (shared design studio) ────────────────────────────
 
 /** Who a Classroom participant is. Drives the small role tag on contributions. */

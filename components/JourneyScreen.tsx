@@ -30,7 +30,10 @@ function Stage() {
 
   const showWelcome = phase === "welcome" || phase === "splitting" || phase === "entering";
   const showWorkspace =
-    phase === "entering" || phase === "ideaDump" || phase === "conversing";
+    phase === "entering" ||
+    phase === "ideaDump" ||
+    phase === "conversing" ||
+    phase === "recorded";
   const showClassroom = phase === "classroom";
   const showHistory = phase === "history";
 

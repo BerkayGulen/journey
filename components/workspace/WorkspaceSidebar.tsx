@@ -23,11 +23,19 @@ import {
  *
  * Mounted only during the conversation (kept out of the immersive idea-dump).
  */
-export default function WorkspaceSidebar() {
+export default function WorkspaceSidebar({
+  open,
+  onOpenChange,
+}: {
+  /** Controlled open-state (lifted to WorkspaceScreen so the course label can
+      step aside while the panel is open). */
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const { mode } = useJourney();
   const reduced = useReducedMotion();
   const adversarial = mode === "adversarial";
-  const [open, setOpen] = useState(false);
+  const setOpen = onOpenChange;
   const [hovered, setHovered] = useState(false);
 
   const heading = adversarial ? "text-white/85" : "text-foreground/85";
@@ -50,7 +58,7 @@ export default function WorkspaceSidebar() {
             type="button"
             onClick={() => setOpen(true)}
             aria-label="Open milestones"
-            className="absolute right-7 top-7 z-20 hidden flex-col gap-[5px] p-1 outline-none md:flex"
+            className="absolute right-7 top-20 z-20 hidden flex-col gap-[5px] p-1 outline-none md:flex"
             initial={reduced ? { opacity: 0 } : { opacity: 0, x: 12 }}
             animate={reduced ? { opacity: 1 } : { opacity: 1, x: 0 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, x: 12 }}

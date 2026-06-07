@@ -12,6 +12,7 @@ import {
 } from "react";
 import type { AiMode, ChatMessage, Conversation, Course, Semester } from "@/types";
 import { ai } from "@/lib/ai";
+import { recordedConversations } from "@/data/recorded-chat";
 
 /**
  * Journey state machine — the single top-level orchestrator for moving from the
@@ -29,6 +30,7 @@ export type JourneyPhase =
   | "entering" // Private chosen — welcome animating out, workspace in
   | "ideaDump" // immersive intro: student blob + free-form brain dump
   | "conversing" // turns exchanged with the AI
+  | "recorded" // read-only pre-recorded transcript (ID 202 demo)
   | "classroom" // full-page shared design studio (Classroom workspace)
   | "history"; // full-page academic-history detail view (semester columns)
 
@@ -120,15 +122,18 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // The `entering` phase exists purely to give the cross-transition a window;
-  // advance to the idea-dump once it has had time to play.
+  // advance once it has had time to play. Courses with a pre-recorded transcript
+  // (only ID 202) open the read-only demo; everyone else gets the idea-dump.
   useEffect(() => {
     if (phase !== "entering") return;
     const reduced =
       typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const id = setTimeout(() => setPhase("ideaDump"), reduced ? 0 : ENTER_MS);
+    const next =
+      selectedCourse && recordedConversations[selectedCourse.id] ? "recorded" : "ideaDump";
+    const id = setTimeout(() => setPhase(next), reduced ? 0 : ENTER_MS);
     return () => clearTimeout(id);
-  }, [phase]);
+  }, [phase, selectedCourse]);
 
   // ── Conversation ─────────────────────────────────────────────────────────
 

@@ -118,6 +118,23 @@ Stacking (z-index): aurora background `-z-10` → canvas `z-0` → sidebars `z-1
   mirrors the left's interaction: hover widens the panel + the hovered block grows to reveal its
   label; active blocks open the history view, locked blocks muted/`not-allowed`),
   `ConnectionCanvas`, `Wordmark`.
+- `components/workspace/` — the **Private Chat** (the student's own thinking space), entered from the
+  bottom half of the course split (`choosePrivate()`). `WorkspaceScreen` owns the background (light
+  Socratic → near-black Adversarial), the amorphous `BlobField`, the top-left Journey mark (home),
+  the centered `ModeIndicator` (Socratic/Adversarial toggle), and a **top-right course label** (code ·
+  name · "Private Chat", mode-aware colors — matches the Classroom). Phases: **`ideaDump`**
+  (`IdeaDumpIntro` brain-dump) → **`conversing`** (`ConversationView` + `MessageBubble`s styled by the
+  live `mode`, streamed AI reply via `lib/ai.ts`, `ThinkingInput`). **`recorded`** is a separate,
+  **read-only** phase used ONLY by courses with an entry in `data/recorded-chat.ts` (`recordedConversations`,
+  keyed by course id — currently just **ID 202**): `choosePrivate()` routes there instead of `ideaDump`
+  when a transcript exists. `RecordedConversation` renders the stored student↔Journey turns (reusing the
+  Socratic `MessageBubble`, each styled by its own recorded `mode`; `whitespace-pre-line` for multi-line
+  dumps) with inline **milestone markers** and no composer; the mode toggle acts as a **section jump**
+  (missing mode → a transient note, snaps back to Socratic), and the demo stays in the readable Socratic
+  light register regardless of the toggle. The **Milestones sidebar** (`WorkspaceSidebar`, `hidden
+  md:flex`) is collapsed to a three-line handle (below the course label) that opens the panel; its
+  open-state is **lifted to `WorkspaceScreen`** so the course label hides while the (near-transparent)
+  panel is open. Escape returns to the welcome screen.
 - `components/history/` — `HistoryDetail` (full-page semester view; Escape or the top-left Journey
   logo returns — no back arrow).
   **Responsive:** wide screens render full-height `CourseColumn`s (widen-in-place on click);
