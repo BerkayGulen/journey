@@ -2,10 +2,16 @@
 
 import { motion } from "motion/react";
 
-export type ClassroomLayer = "wall" | "assignments" | "selected";
+export type ClassroomLayer = "wall" | "announcements" | "assignments" | "selected";
 
-const ITEMS: { id: ClassroomLayer; label: string }[] = [
+const STUDIO_ITEMS: { id: ClassroomLayer; label: string }[] = [
   { id: "wall", label: "Studio Wall" },
+  { id: "assignments", label: "Assignments" },
+  { id: "selected", label: "Selected Works" },
+];
+
+const LECTURE_ITEMS: { id: ClassroomLayer; label: string }[] = [
+  { id: "announcements", label: "Announcements" },
   { id: "assignments", label: "Assignments" },
   { id: "selected", label: "Selected Works" },
 ];
@@ -13,21 +19,25 @@ const ITEMS: { id: ClassroomLayer; label: string }[] = [
 /**
  * Minimal text-only navigation between the Classroom's layers — no dashboard
  * chrome. A thin underline marks the active layer (shared `layoutId` so it
- * glides between items). Rendered inline inside the app bar (the header
- * positions it); it carries no positioning of its own.
+ * glides between items). Studio courses lead with the Studio Wall; non-studio
+ * (lecture) courses lead with Announcements. Rendered inline inside the app bar
+ * (the header positions it); it carries no positioning of its own.
  */
 export default function LayerNav({
   active,
   accent,
+  studio,
   onChange,
 }: {
   active: ClassroomLayer;
   accent: string;
+  studio: boolean;
   onChange: (layer: ClassroomLayer) => void;
 }) {
+  const items = studio ? STUDIO_ITEMS : LECTURE_ITEMS;
   return (
     <nav className="flex items-center gap-5 sm:gap-7">
-      {ITEMS.map((item) => {
+      {items.map((item) => {
         const on = item.id === active;
         return (
           <button

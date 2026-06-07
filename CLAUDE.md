@@ -32,7 +32,10 @@ install chromium`, then drive `http://localhost:3000` headless and screenshot
 (move the mouse to exercise hover/expand/cursor-bend states). Read the PNG back to inspect.
 Drive scripts (output to `scripts/shots/`, gitignored): `scripts/drive.py` (welcome→workspace),
 `drive_history.py` (history sidebar + detail), `drive_classroom.py` (welcome→classroom studio: pan
-+ artifact discussion + assignments + selected works; takes `--reduced`), `drive_mobile.py` (390×844 +
++ artifact discussion + assignments + selected works; takes `--reduced`), `drive_course_types.py`
+(studio vs non-studio Classroom: announcements/accordion assignments/placeholder selected-works +
+empty states; uses `reduced_motion` to freeze the sidebar carousel so courses sit at fixed y
+positions — see the script header), `drive_mobile.py` (390×844 +
 `has_touch`; asserts no horizontal overflow), `drive_reduced.py` (reduced-motion). The back control is an image, not
 text — select it with `get_by_label("Back to Journey")`, not `get_by_text`.
 
@@ -76,16 +79,26 @@ Stacking (z-index): aurora background `-z-10` → canvas `z-0` → sidebars `z-1
   targets (line endpoints, anchored as `history-{semester.id}`). Holds **two separate palettes**:
   `semesters[].color` = the 8 right-spine block colors (Butter/Guava/Sunset/Sangria/Moss/Palm/
   Lagoon/Odyssey); `columnPalette` = the per-course colors of the history-detail columns. Don't conflate.
-- `data/classroom.ts` — **single source of truth** for the Classroom workspace (the shared design
-  studio). Active project = **"Amplifying Sound Through Form"** (ID 202, passive sound amplifier;
-  class is in Phase 4). Exports: `clusters` (4 themed groups), `studioObjects` (artifacts placed
-  spatially in wall px via `x/y/w/h`), `studioConnections` (object→object pairs the studio canvas
-  draws), `discussions` (keyed by object id), `projectBrief` (the central reference: objective + 4
-  graded phases), `assignmentPhases` (the 5-step timeline with `completed`/`active`/`locked`),
-  `myAssignments` (the student's OWN work only), `selectedWorks` (instructor-picked *learning
-  moments* from earlier phases — NOT final outcomes; renamed from "Published Work" — don't
-  reintroduce that term — each points to a full board `image` in `public/assets/`). `WALL` = the pannable plane size. Timestamps use `Date.UTC(...)` (pure →
-  no SSR drift), formatted as a short date. Mocked but API-ready.
+- `data/classroom.ts` — **single source of truth** for the Classroom. **Two course kinds** (see
+  `Course.studio` + `isStudioCourse()` in `data/courses.ts`): the **studio** course (ID 202 only)
+  and the **lecture** (non-studio) courses (everything else).
+  - **Studio (ID 202)** — the full shared design studio. Active project = **"Amplifying Sound
+    Through Form"** (passive sound amplifier; class is in Phase 4). Exports: `clusters` (4 themed
+    groups), `studioObjects` (artifacts placed spatially in wall px via `x/y/w/h`),
+    `studioConnections` (object→object pairs the studio canvas draws), `discussions` (keyed by
+    object id), `projectBrief` (the central reference: objective + 4 graded phases),
+    `assignmentPhases` (the 5-step timeline with `completed`/`active`/`locked`), `myAssignments`
+    (the student's OWN work only), `selectedWorks` (instructor-picked *learning moments* from
+    earlier phases — NOT final outcomes; renamed from "Published Work" — don't reintroduce that
+    term — each points to a full board `image` in `public/assets/`). `WALL` = the pannable plane
+    size. **Leave this untouched** — the studio is intentionally frozen.
+  - **Lecture courses** — `courseClassrooms: Record<courseId, CourseClassroom>` (keyed by course
+    id) holds each non-studio course's `announcements` (instructor-only notice board, read-only),
+    `assignments`, and `selectedWorks`. `Assignment` gained optional `description` + `focus`
+    (lecture detail); `SelectedWork.image`/`phase` are optional (lecture works have no board image →
+    a generated colored placeholder cover, no phase badge).
+  - Timestamps use `Date.UTC(...)` (pure → no SSR drift), formatted as a short date. Mocked but
+    API-ready.
 - **Two logos.** (1) The handwriting "Journey" wordmark — only the hero welcome screen
   (`Wordmark.tsx` renders `/icons/journeyLogo.png` directly; `JourneyLogo.tsx` is the same asset as a
   tintable component, currently unused). (2) `components/JourneyMark.tsx` — the **round** "Journey"
@@ -120,19 +133,31 @@ Stacking (z-index): aurora background `-z-10` → canvas `z-0` → sidebars `z-1
   an opaque/blurred bg) so scrolling layers pass cleanly beneath it — left = `PortalLogo` (the
   circular **placeholder** home/portal mark, clickable → `reset()`; **no back arrow, no wordmark** —
   swap the SVG in `PortalLogo.tsx` when the real asset lands), center = `LayerNav` (inline, text-only),
-  right = course label (`hidden sm:block`). Three layers: **Studio Wall** (`StudioWall` = a curated,
-  pre-arranged plane you *pan* by dragging the background — no zoom/rearrange; `ArtifactCard`s register
-  `studio-{id}` and `StudioCanvas` draws the flowing lines, reading live panned rects exactly like
-  `ConnectionCanvas`), **Assignment Space** (`AssignmentSpace` = private/own-only, with a prominent
-  **Project Brief** button → full `ProjectBriefView` reading overlay, a **phase timeline**, and mocked
-  uploads), **Selected Works** (`SelectedWorks` = gallery of student *board images* from
-  `public/assets/`; clicking a card opens a `DiscussionPanel` showing the board image + note + the
-  comment thread; clicking the image opens `SelectedWorkLightbox` full-size). **Discussion**
-  (`DiscussionPanel`) is a contextual side sheet — stacked **annotations with role tags + a composer,
-  NOT chat bubbles** — used by both Studio Wall objects (plain) and Selected Works (with an optional
-  `meta` block: board image, phase, description, instructor note, tags). **Accent legibility:**
-  `ClassroomScreen` falls back to a deep ink when
-  `readableTextColor(courseColor) !== "#fff"` (light course colors can't carry white chrome).
+  right = course label (`hidden sm:block`, three lines: course **code**, course **name**, then
+  `Classroom · Studio`/`Classroom · Lecture`). **`ClassroomScreen` branches on `isStudioCourse`:**
+  - **Studio (ID 202)** — three layers: **Studio Wall** (`StudioWall` = a curated, pre-arranged
+    plane you *pan* by dragging the background — no zoom/rearrange; `ArtifactCard`s register
+    `studio-{id}` and `StudioCanvas` draws the flowing lines, reading live panned rects exactly like
+    `ConnectionCanvas`), **Assignment Space** (`AssignmentSpace` = private/own-only, with a prominent
+    **Project Brief** button → full `ProjectBriefView` reading overlay, a **phase timeline**, and
+    mocked uploads), **Selected Works** (`SelectedWorks` = gallery of student *board images* from
+    `public/assets/`; clicking a card opens a `DiscussionPanel` with the board image + note + thread;
+    clicking the image opens `SelectedWorkLightbox` full-size). Default layer = Studio Wall. This path
+    is unchanged from the original ID 202 implementation.
+  - **Lecture (all other courses)** — three layers from `courseClassrooms[course.id]`: **Announcements**
+    (`Announcements` = read-only instructor notice board, newest-first, title/message/instructor/date;
+    NOT a feed/board/chat — no composer), **Assignment Space** (`CourseAssignments` = accordion of
+    "Assignment N" buttons that expand in place to Project Details + focus chips + submissions +
+    private feedback + upload; **no** phase timeline or Project Brief), **Selected Works** (same
+    `SelectedWorks` component; imageless works render a generated colored placeholder cover and no
+    phase badge; empty → "Nothing posted yet."). Default layer = Announcements. `LayerNav` takes a
+    `studio` boolean to pick `STUDIO_ITEMS` vs `LECTURE_ITEMS`.
+  - **Discussion** (`DiscussionPanel`) is a contextual side sheet — stacked **annotations with role
+    tags + a composer, NOT chat bubbles** — used by Studio Wall objects (plain) and Selected Works
+    (optional `meta` block: board image, phase, description, instructor note, tags; all optional, so
+    lecture works show just the note + thread). **Accent legibility:** `ClassroomScreen` falls back to
+    a deep ink when `readableTextColor(courseColor) !== "#fff"` (light course colors can't carry
+    white chrome).
 
 ### Conventions
 

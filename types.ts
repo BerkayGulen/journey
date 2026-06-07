@@ -8,6 +8,12 @@ export interface Course {
   name: string;
   /** Persistent course color (hex). */
   color: string;
+  /**
+   * True only for the design *studio* course (ID 202), which keeps the full
+   * Classroom (Studio Wall · Assignments · Selected Works). All other courses
+   * are lecture/non-studio: Announcements · Assignments · Selected Works.
+   */
+  studio?: boolean;
 }
 
 // ── Academic history (right sidebar = semester spine) ─────────────────────
@@ -193,6 +199,14 @@ export interface Assignment {
   submissions: Submission[];
   /** Optional private instructor feedback (only on the student's own work). */
   feedback?: string;
+  /**
+   * Longer "Project Details" description (non-studio courses). Shown when the
+   * assignment is expanded in the lecture Assignment Space. Studio assignments
+   * leave this unset and use `brief`.
+   */
+  description?: string;
+  /** Optional "Focus on:" / "Reference topics:" bullet list (non-studio). */
+  focus?: string[];
 }
 
 /**
@@ -205,15 +219,22 @@ export interface SelectedWork {
   id: string;
   studentName: string;
   title: string;
-  /** Which project phase this moment came from (1-based) + its label. */
-  phase: number;
-  phaseLabel: string;
-  /** The board image (public path) — card cover + opened full-size on click. */
-  image: string;
+  /**
+   * Which project phase this moment came from (1-based) + its label. Optional:
+   * non-studio (lecture) selected works are not phase-based.
+   */
+  phase?: number;
+  phaseLabel?: string;
+  /**
+   * The board image (public path) — card cover + opened full-size on click.
+   * Optional: non-studio works have no board image yet and render a generated
+   * colored placeholder cover instead.
+   */
+  image?: string;
   /** Accent color (hex) for the card frame / phase tag. */
   color: string;
   /** What the work shows / why it matters. */
-  description: string;
+  description?: string;
   /** Instructor note on why it was selected. */
   instructorNote?: string;
   /** Attribution for the note, e.g. "Prof. L. Kavak". */
@@ -258,4 +279,30 @@ export interface AssignmentPhase {
   number: number;
   title: string;
   status: PhaseStatus;
+}
+
+// ── Announcements (non-studio courses) ────────────────────────────────────
+
+/**
+ * A single instructor announcement on a non-studio course's notice board.
+ * Read-only for students: a calm digital notice board, NOT a feed or chat.
+ */
+export interface Announcement {
+  id: string;
+  title: string;
+  message: string;
+  /** Posting instructor's name. */
+  instructor: string;
+  /** Epoch ms — rendered as a posting date; the board sorts newest-first. */
+  postedAt: number;
+}
+
+/**
+ * The Classroom contents for one non-studio (lecture) course. Studio (ID 202)
+ * does not use this — it keeps its dedicated exports in `data/classroom.ts`.
+ */
+export interface CourseClassroom {
+  announcements: Announcement[];
+  assignments: Assignment[];
+  selectedWorks: SelectedWork[];
 }

@@ -4,8 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useJourney } from "@/lib/journey-state";
 import { readableTextColor } from "@/lib/geometry";
+import { isStudioCourse } from "@/data/courses";
 import {
   clusters,
+  courseClassrooms,
   discussions as seedDiscussions,
   selectedWorks as seedSelected,
   studioObjects,
@@ -16,6 +18,8 @@ import JourneyMark from "@/components/JourneyMark";
 import LayerNav, { type ClassroomLayer } from "@/components/classroom/LayerNav";
 import StudioWall from "@/components/classroom/StudioWall";
 import AssignmentSpace from "@/components/classroom/AssignmentSpace";
+import CourseAssignments from "@/components/classroom/CourseAssignments";
+import Announcements from "@/components/classroom/Announcements";
 import SelectedWorks from "@/components/classroom/SelectedWorks";
 import SelectedWorkLightbox from "@/components/classroom/SelectedWorkLightbox";
 import DiscussionPanel from "@/components/classroom/DiscussionPanel";
@@ -37,21 +41,29 @@ export default function ClassroomScreen() {
   const { selectedCourse, reset } = useJourney();
   const reduced = useReducedMotion();
 
+  // Studio (ID 202) keeps the full Classroom; every other course is a lecture
+  // course with a simplified structure (Announcements · Assignments · Selected
+  // Works) driven by per-course data.
+  const studio = isStudioCourse(selectedCourse);
+  const lecture = !studio ? courseClassrooms[selectedCourse?.id ?? ""] : undefined;
+
   // A legible accent: use the course color when it can carry light text;
   // otherwise fall back to a deep studio ink so chrome stays readable.
   const raw = selectedCourse?.color ?? "#23617E";
   const accent = readableTextColor(raw) === "#ffffff" ? raw : "#23617E";
 
-  const [layer, setLayer] = useState<ClassroomLayer>("wall");
+  const [layer, setLayer] = useState<ClassroomLayer>(studio ? "wall" : "announcements");
   const [openObjectId, setOpenObjectId] = useState<string | null>(null);
   const [openSelectedId, setOpenSelectedId] = useState<string | null>(null);
   const [fullImage, setFullImage] = useState(false);
 
-  // Session-local copies so discussions/comments persist while the studio is open.
+  // Session-local copies so discussions/comments persist while the room is open.
   const [objectThreads, setObjectThreads] = useState<Record<string, ClassroomContribution[]>>(
     () => structuredClone(seedDiscussions),
   );
-  const [works, setWorks] = useState<SelectedWork[]>(() => structuredClone(seedSelected));
+  const [works, setWorks] = useState<SelectedWork[]>(() =>
+    structuredClone(studio ? seedSelected : lecture?.selectedWorks ?? []),
+  );
 
   const closePanels = useCallback(() => {
     setOpenObjectId(null);
@@ -105,13 +117,21 @@ export default function ClassroomScreen() {
       <div className="bg-aurora pointer-events-none absolute inset-0 -z-0 opacity-60" aria-hidden />
 
       {/* Active layer fills the screen (behind the app bar). */}
-      {layer === "wall" && (
+      {studio && layer === "wall" && (
         <StudioWall
           countFor={(id) => objectThreads[id]?.length ?? 0}
           onOpenObject={(o: StudioObject) => setOpenObjectId(o.id)}
         />
       )}
-      {layer === "assignments" && <AssignmentSpace accent={accent} />}
+      {!studio && layer === "announcements" && (
+        <Announcements announcements={lecture?.announcements ?? []} accent={accent} />
+      )}
+      {layer === "assignments" &&
+        (studio ? (
+          <AssignmentSpace accent={accent} />
+        ) : (
+          <CourseAssignments assignments={lecture?.assignments ?? []} accent={accent} />
+        ))}
       {layer === "selected" && (
         <SelectedWorks works={works} onOpen={(w) => setOpenSelectedId(w.id)} />
       )}
@@ -132,7 +152,7 @@ export default function ClassroomScreen() {
         </motion.button>
 
         <div className="flex flex-1 justify-center">
-          <LayerNav active={layer} accent={accent} onChange={switchLayer} />
+          <LayerNav active={layer} accent={accent} studio={studio} onChange={switchLayer} />
         </div>
 
         {selectedCourse && (
@@ -140,7 +160,12 @@ export default function ClassroomScreen() {
             <div className="text-xs font-semibold tracking-wide text-foreground/70">
               {selectedCourse.code}
             </div>
-            <div className="text-[11px] text-foreground/40">Classroom · Studio</div>
+            <div className="max-w-[15rem] truncate text-[11px] text-foreground/55">
+              {selectedCourse.name}
+            </div>
+            <div className="text-[11px] text-foreground/40">
+              {studio ? "Classroom · Studio" : "Classroom · Lecture"}
+            </div>
           </div>
         )}
       </header>
@@ -166,7 +191,11 @@ export default function ClassroomScreen() {
           <DiscussionPanel
             key={`sel-${openSelected.id}`}
             title={openSelected.title}
-            subtitle={`${openSelected.studentName} · ${openSelected.phaseLabel}`}
+            subtitle={
+              openSelected.phaseLabel
+                ? `${openSelected.studentName} · ${openSelected.phaseLabel}`
+                : openSelected.studentName
+            }
             accent={openSelected.color}
             contributions={openSelected.comments}
             meta={{
@@ -196,8 +225,8 @@ export default function ClassroomScreen() {
         )}
       </AnimatePresence>
 
-      {/* Hint, only on the wall. */}
-      {layer === "wall" && (
+      {/* Hint, only on the studio wall. */}
+      {studio && layer === "wall" && (
         <motion.div
           className="pointer-events-none absolute bottom-5 left-1/2 z-20 -translate-x-1/2 font-hand text-base italic text-foreground/35"
           initial={{ opacity: 0 }}
