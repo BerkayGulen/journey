@@ -56,7 +56,7 @@ export default function CourseAssignments({
   return (
     <div className="absolute inset-0 overflow-y-auto">
       <div className="mx-auto max-w-2xl px-6 pb-20 pt-28 sm:pt-32">
-        <h2 className="font-hand text-4xl text-foreground">Assignment Space</h2>
+        <h2 className="font-hand text-[26px] text-foreground">Assignment Space</h2>
         <p className="mt-2 max-w-prose text-sm leading-relaxed text-foreground/55">
           A private space between you and your instructor. Only your own work appears here —
           open an assignment to see its details, your submissions, and feedback.

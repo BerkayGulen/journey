@@ -24,7 +24,7 @@ export default function SelectedWorks({
     return (
       <div className="absolute inset-0 overflow-y-auto">
         <div className="mx-auto max-w-5xl px-6 pb-20 pt-28 sm:pt-32">
-          <h2 className="font-hand text-4xl text-foreground">Selected Works</h2>
+          <h2 className="font-hand text-[26px] text-foreground">Selected Works</h2>
           <p className="mt-16 text-center text-sm italic text-foreground/40">Nothing posted yet.</p>
         </div>
       </div>
@@ -34,7 +34,7 @@ export default function SelectedWorks({
   return (
     <div className="absolute inset-0 overflow-y-auto">
       <div className="mx-auto max-w-5xl px-6 pb-20 pt-28 sm:pt-32">
-        <h2 className="font-hand text-4xl text-foreground">Selected Works</h2>
+        <h2 className="font-hand text-[26px] text-foreground">Selected Works</h2>
         <p className="mt-2 max-w-prose text-sm leading-relaxed text-foreground/55">
           Moments the instructors chose for what they teach — sharp observations, strong research,
           brave ideation, telling experiments. Not finished projects: the value is in the process.
@@ -112,7 +112,7 @@ function PlaceholderCover({ work }: { work: SelectedWork }) {
         )} 100%)`,
       }}
     >
-      <span className="font-hand text-2xl leading-tight text-white/95">{work.title}</span>
+      <span className="font-hand text-lg leading-tight text-white/95">{work.title}</span>
     </div>
   );
 }

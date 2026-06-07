@@ -162,7 +162,7 @@ export default function DiscussionPanel({
             </div>
           )}
           {contributions.length === 0 ? (
-            <p className="py-6 font-hand text-xl text-foreground/40">
+            <p className="py-6 text-sm text-foreground/40">
               No discussion yet — start one.
             </p>
           ) : (
